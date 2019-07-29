@@ -1,2 +1,6 @@
 pyyaml
 pymongo
+pyautogui
+numpy
+pypiwin32
+opencv-contrib-python

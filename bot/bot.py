@@ -12,8 +12,10 @@ class Bot:
     def __init__(self):
         self.log = Logger('bot')
         self.config = get_config('bot')
-        self.tree_nav = TreeNavigator()
-        self.trader = Trader()
+        self.resolution = self.split_res(self.config['resolution'])
+        self.tree_nav = TreeNavigator(self.resolution)
+        self.trader = Trader(self.resolution)
+        self.input_handler = InputHandler(self.resolution)
         self.db = MongoClient(self.config['db_url'])
         self.run = True
 
@@ -33,7 +35,7 @@ class Bot:
             self.store_items(jewels, username)
             self.trader.return_items(username, item_locations)
 
-    def store_items(items, reporter):
+    def store_items(self, items, reporter):
         item_list = []
         creation_time = datetime.utcnow()
         for item in items:
@@ -46,3 +48,7 @@ class Bot:
             item_list.append(new_item)
         result = self.db['timeless'].insert_many(item_list)
         return result
+
+    def split_res(self, resolution):
+        resolution = resolution.split('x')
+        return resolution
