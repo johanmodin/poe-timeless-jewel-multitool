@@ -30,3 +30,8 @@ A Path of Exile bot which allows the highly random timeless jewels to be present
 2. Skillträdet är för stort för att synas på en skärm. Vi kan navigera genom att alltid börja med att dra skillträdet så att vår skärm hamnar i övre vänstra hörnet och sedan utgå därifrån. Så länge vi vet var varje juvel slot finns (x, y) och vi vet var vår skärm är centrerad (x, y) så bör detta gå att göra.
 3. Vi måste hålla reda på vår inventory. Vilka slots är lediga? I vilken slot kommer ett item vi får tradeat att hamna? Detta måste vi veta för att tradea tillbaka rätt item. 
 4. Att läsa av noderna i skillträdet kan göras med OCR. Det finns två problem med detta: 1. lokalisera och klipp ut den mörklagda rutan med nodens stats och 2. använd OCR för att skapa strängar från den utklippta bilden. Det första problemet kan antagligen lösas med lite finurlig bildanalys. Det andra problemet kan antagligen lösas tillräckligt bra med pytesseract.
+
+### Setup
+`pip install -r requirements.txt`
+Stå nära stashen. Inga fönster ska vara öppna.
+Kör `python run_bot.py` och tabba in i PoE.
