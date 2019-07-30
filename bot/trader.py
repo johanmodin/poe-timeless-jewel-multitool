@@ -294,7 +294,7 @@ class Trader:
         msg['user'] = None
         msg['text'] = None
         if msg['type'] in ['global', 'party', 'whisper']:
-            name_start = last_info_idx + 1
+            name_start = last_info_idx + len(content.split(' ')[0])
             name_end = name_start + line[name_start: ].find(':')
             name = line[name_start: name_end].lower()
             if '>' in name:

@@ -23,7 +23,7 @@ class Bot:
         self.run = True
 
     def loop(self):
-        time.sleep(2)
+        time.sleep(10)
         while self.run:
             empty = self.trader.verify_empty_inventory()
             if not empty:
