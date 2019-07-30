@@ -32,6 +32,6 @@ A Path of Exile bot which allows the highly random timeless jewels to be present
 4. Att läsa av noderna i skillträdet kan göras med OCR. Det finns två problem med detta: 1. lokalisera och klipp ut den mörklagda rutan med nodens stats och 2. använd OCR för att skapa strängar från den utklippta bilden. Det första problemet kan antagligen lösas med lite finurlig bildanalys. Det andra problemet kan antagligen lösas tillräckligt bra med pytesseract.
 
 ### Setup
-`pip install -r requirements.txt`
-Stå nära stashen. Inga fönster ska vara öppna.
-Kör `python run_bot.py` och tabba in i PoE.
+1. `pip install -r requirements.txt`
+2. Stå nära stashen. Inga fönster ska vara öppna.
+3. Kör `python run_bot.py` och tabba in i PoE.
