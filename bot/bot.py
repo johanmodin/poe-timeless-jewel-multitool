@@ -1,16 +1,18 @@
 from queue import Queue
 from pymongo import MongoClient
-from logging import Logger
 from datetime import datetime
+import logging
 
-from trader import Trader
-from tree_navigator import TreeNavigator
-from utils import get_config
+from .trader import Trader
+from .tree_navigator import TreeNavigator
+from .utils import get_config
+from .input_handler import InputHandler
 
 
 class Bot:
     def __init__(self):
-        self.log = Logger('bot')
+        logging.basicConfig(level=logging.INFO)
+        self.log = logging.getLogger('bot')
         self.config = get_config('bot')
         self.resolution = self.split_res(self.config['resolution'])
         self.tree_nav = TreeNavigator(self.resolution)
@@ -20,6 +22,7 @@ class Bot:
         self.run = True
 
     def loop(self):
+        self.trader.stash_items()
         while self.run:
             empty = self.trader.verify_empty_inventory()
             if not empty:
@@ -50,5 +53,5 @@ class Bot:
         return result
 
     def split_res(self, resolution):
-        resolution = resolution.split('x')
+        resolution = [int(n) for n in resolution.split('x')]
         return resolution

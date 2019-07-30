@@ -5,6 +5,6 @@ import time
 
 
 def get_config(module_name):
-    config_path = os.path.abspath(os.path.join('..', 'config.yml'))
-    config = yaml.load(config_path)
+    config_path = os.path.abspath('config.yml')
+    config = yaml.load(open(config_path, 'r'))
     return config[module_name]

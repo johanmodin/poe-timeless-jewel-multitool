@@ -1,9 +1,9 @@
-- bot:
+bot:
     timeout: 30
     db_url: 'mongodb://localhost:27017/'
     resolution: '2560x1440'
-- input_handler:
+input_handler:
     key_press_interval: 200
     mouse_click_interval: 300
-- trader:
+trader:
     log_path: 'X:\Steam\steamapps\common\Path of Exile\logs'
