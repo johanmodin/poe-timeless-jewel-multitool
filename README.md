@@ -33,5 +33,6 @@ A Path of Exile bot which allows the highly random timeless jewels to be present
 
 ### Setup
 1. `pip install -r requirements.txt`
-2. Stå nära stashen. Inga fönster ska vara öppna.
-3. Kör `python run_bot.py` och tabba in i PoE.
+2. Ställ in dina inställningar i config.yml. Botten är bara testad med 2560x1440.
+3. Stå nära stashen. Inga fönster ska vara öppna.
+4. Kör `python run_bot.py` och tabba in i PoE.
