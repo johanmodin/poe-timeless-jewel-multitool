@@ -1,5 +1,6 @@
 import win32api
 import win32con
+import win32clipboard
 from random import randint, random
 import sys
 
@@ -15,7 +16,7 @@ class InputHandler:
         self.res_h = resolution[1]
         self.config = get_config('input_handler')
 
-    def click(self, x_top,  y_top, x_bot, y_bot, button='left'):
+    def click(self, x_top,  y_top, x_bot, y_bot, button='left', speed_factor=1):
         x_top *= self.res_w
         x_bot *= self.res_w
         y_top *= self.res_h
@@ -23,11 +24,13 @@ class InputHandler:
 
         x = x_top + random() * (x_bot - x_top)
         y = y_top + random() * (x_bot - x_top)
-        pyautogui.moveTo(x, y, self._rnd(min=100, mean=150, sigma=100) / 1000,
+        pyautogui.moveTo(x, y, self._rnd(min=100 / speed_factor, mean=150 / speed_factor,
+                         sigma=100 / speed_factor) / 1000,
                          pyautogui.easeOutQuad)
         self._hw_move(x, y)
-        self.rnd_sleep(mean=self.config['mouse_click_interval'])
-        pyautogui.click(x=None, y=None, button=button)
+        self.rnd_sleep(mean=self.config['mouse_click_interval'] / speed_factor)
+        if button is not None:
+            pyautogui.click(x=None, y=None, button=button)
 
     def click_keys(self, keys):
         self._press_keys(keys)
@@ -35,6 +38,7 @@ class InputHandler:
 
     def click_hotkey(self, hotkey):
         pyautogui.press(hotkey)
+        self.rnd_sleep(mean=self.config['key_press_interval'])
 
     def _press_keys(self, keys):
         for key in keys:
@@ -48,7 +52,7 @@ class InputHandler:
 
     def type(self, text):
         self.click_keys([0x1c])
-        pyautogui.typewrite(text, interval=self.config['key_press_interval'])
+        pyautogui.typewrite(text, interval=self.config['key_press_interval']/1000)
         self.click_keys([0x1c])
 
     def _hw_move(self, x, y):
@@ -65,16 +69,28 @@ class InputHandler:
             r = np.random.normal(mean, sigma)
         return r
 
-    def inventory_click(self, slot_x, slot_y, ctrl_click=False):
+    def inventory_click(self, slot_x, slot_y, inventory_base, ctrl_click=False, button='left', speed_factor=1):
         if ctrl_click:
             self._press_keys([0x1d])
-        inventory_base = (0.665625, 0.552083)
-        self.click(inventory_base[0] + slot_x*0.02773,
-                   inventory_base[1] + slot_y*0.049305,
-                   inventory_base[0] + slot_x*0.02773 + 0.015625,
-                   inventory_base[1] + slot_y*0.049305 + 0.027777)
+        self.click(inventory_base[0] + slot_x * 0.02735,
+                   inventory_base[1] + slot_y * 0.04930555,
+                   inventory_base[0] + slot_x * 0.02735 + 0.005625,
+                   inventory_base[1] + slot_y * 0.04930555 + 0.007777,
+                   speed_factor=speed_factor, button=button)
         if ctrl_click:
             self._release_keys([0x1d])
+
+    def inventory_copy(self, slot_x, slot_y, inventory_base, speed_factor=1):
+        self.click(inventory_base[0] + slot_x * 0.02735,
+                   inventory_base[1] + slot_y * 0.04930555,
+                   inventory_base[0] + slot_x * 0.02735 + 0.005625,
+                   inventory_base[1] + slot_y * 0.04930555 + 0.007777,
+                   speed_factor=speed_factor, button=None)
+        self._copy()
+        win32clipboard.OpenClipboard()
+        data = win32clipboard.GetClipboardData()
+        win32clipboard.CloseClipboard()
+        return data
 
     def _copy(self):
         self.click_keys([0x1d, 0x2e])
