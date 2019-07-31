@@ -23,8 +23,9 @@ class Bot:
         self.run = True
 
     def loop(self):
-        time.sleep(10)
+        time.sleep(5)
         while self.run:
+            '''
             empty = self.trader.verify_empty_inventory()
             if not empty:
                 self.trader.stash_items()
@@ -32,14 +33,16 @@ class Bot:
             successfully_received = self.trader.get_items(username)
             if not successfully_received:
                 continue
+            '''
             jewels = []
             jewel_locations = self.trader.get_jewel_locations()
             self.log.info('Got new jewels at %s' % jewel_locations)
-            #for jewel_location in jewel_locations:
-            #    description, stats = self.tree_nav.eval_jewel(jewel_location)
-            #    jewels.append((description, stats))
+            for jewel_location in jewel_locations:
+                description, stats = self.tree_nav.eval_jewel(jewel_location)
+                jewels.append((description, stats))
+
             #self.store_items(jewels, username)
-            self.trader.return_items(username, jewel_locations)
+            #self.trader.return_items(username, jewel_locations)
 
     def store_items(self, items, reporter):
         item_list = []

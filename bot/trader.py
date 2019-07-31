@@ -36,20 +36,22 @@ class Trader:
         self.byte_pos = byte_pos
 
     def stash_items(self):
-        self.input_handler.click_hotkey('i')
+        stash_loc = self._find_stash()
+        self.log.info('Found stash at %s' % stash_loc)
+        stash_loc_br = [stash_loc[0] + 0.005, stash_loc[1] + 0.005]
+        self.input_handler.click(*stash_loc, *stash_loc_br)
+        self.input_handler.rnd_sleep(min=1200, mean=1500)
         slots = self.find_nonempty_inventory_slots(origin=OWN_INVENTORY_ORIGIN)
-        self.input_handler.click_hotkey('i')
-        if int(np.sum(slots)) > 0:
-            stash_loc = self._find_stash()
-            self.log.info('Found stash at %s' % stash_loc)
-            stash_loc_br = [stash_loc[0] + 0.005, stash_loc[1] + 0.005]
-            self.input_handler.click(*stash_loc, *stash_loc_br)
-            item_locations = np.argwhere(slots == 1)
-            for loc in item_locations:
-                self.input_handler.inventory_click(loc[0], loc[1],
-                    inventory_base=OWN_INVENTORY_ORIGIN, ctrl_click=True)
-            self.input_handler.click_keys([0x81])
-            self.log.info('Stashed %s items' % int(np.sum(slots)))
+        item_locations = np.argwhere(slots == 1)
+        for loc in item_locations:
+            self.input_handler.inventory_click(loc[0], loc[1],
+                inventory_base=OWN_INVENTORY_ORIGIN, ctrl_click=True)
+        self.input_handler.click_keys([0x81])
+
+        items_stashed = len(item_locations)
+
+        if items_stashed > 0:
+            self.log.info('Stashed %s items' % items_stashed)
         else:
             self.log.info('No stashing needed, inventory empty')
 
@@ -159,7 +161,6 @@ class Trader:
         return trade_successful
 
     def _return_partners_trade_items(self, locations):
-        timeout = datetime.now() + timedelta(seconds=TRADE_TIMEOUT_AFTER_INITIATED)
         for location in locations:
             self.input_handler.inventory_click(location[0], location[1],
                                                OWN_INVENTORY_ORIGIN,

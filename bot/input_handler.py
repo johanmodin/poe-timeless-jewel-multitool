@@ -16,11 +16,12 @@ class InputHandler:
         self.res_h = resolution[1]
         self.config = get_config('input_handler')
 
-    def click(self, x_top,  y_top, x_bot, y_bot, button='left', speed_factor=1):
-        x_top *= self.res_w
-        x_bot *= self.res_w
-        y_top *= self.res_h
-        y_bot *= self.res_h
+    def click(self, x_top,  y_top, x_bot, y_bot, button='left', speed_factor=1, raw=False):
+        if not raw:
+            x_top *= self.res_w
+            x_bot *= self.res_w
+            y_top *= self.res_h
+            y_bot *= self.res_h
 
         x = x_top + random() * (x_bot - x_top)
         y = y_top + random() * (x_bot - x_top)
@@ -94,3 +95,16 @@ class InputHandler:
 
     def _copy(self):
         self.click_keys([0x1d, 0x2e])
+
+    def zoom(self, clicks):
+        # Did not work in testing
+        dx = int(self.res_w / 2 * 65535 / win32api.GetSystemMetrics(0))
+        dy = int(self.res_h / 2 * 65535 / win32api.GetSystemMetrics(1))
+        self.click(0.499, 0.499, 0.501, 0.501, button=None)
+        win32api.mouse_event(win32con.MOUSEEVENTF_WHEEL, dx, dy, clicks, 0)
+
+    def drag(self, x, y, delta=False):
+        if delta:
+            pyautogui.drag(x, y, self._rnd(min=500, mean=500, sigma=50) / 1000, pyautogui.easeOutQuad, button='left')
+        else:
+            pyautogui.dragTo(x, y, self._rnd(min=500, mean=500, sigma=50) / 1000, pyautogui.easeOutQuad, button='left')
