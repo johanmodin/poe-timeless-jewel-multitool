@@ -5,9 +5,12 @@ from PIL import Image
 import pytesseract
 import os
 import time
+from multiprocessing import Pool
+import json
 
 from .input_handler import InputHandler
 from .grabscreen import grab_screen
+from .utils import get_config
 
 OWN_INVENTORY_ORIGIN = (0.6769531, 0.567361)
 SOCKETS = {
@@ -59,7 +62,7 @@ MOVE_POS = {
 X_SCALE = 0.2
 Y_SCALE = 0.2
 NODE_TEMPLATE_THRESHOLD = 0.1
-TEXTBOX_X_OFFSET = 32
+TEXTBOX_MOUSE_OFFSET = [32, 0]
 CIRCLE_EFFECTIVE_RADIUS = 300
 
 IMAGE_FOLDER = 'data/images/'
@@ -68,7 +71,15 @@ TEMPLATES = {'Notable.png': {'size': (32, 32), 'threshold': 0.8},
              'Skill.png': {'size': (21, 21), 'threshold': 0.87},
              'SkillAllocated.png': {'size': (21, 21), 'threshold':  0.92}}
 
-TXT_BOX = {'x': 30, 'y': 140, 'w': 680, 'h': 480}
+TXT_BOX = {'x': 30, 'y': 0, 'w': 900, 'h': 320}
+
+mod_files = {
+    "passives":  "data/passives.json",
+    "passivesAlt": "data/passivesAlternatives.json",
+    "passivesAdd": "data/passivesAdditions.json",
+    "passivesVaalAdd": "data/passivesVaalAdditions.json",
+}
+
 ### TO DO:
 # Fixa så att trädnavigeraren inte har följdfel genom t ex kontrollpunkter
 # och så att den blir robustare mot brus i musrörelsen
@@ -81,9 +92,12 @@ class TreeNavigator:
         self.input_handler = InputHandler(self.resolution)
         logging.basicConfig(level=logging.INFO)
         self.log = logging.getLogger('tree_nav')
+        self.config = get_config('tree_nav')
         self.origin_pos = (self.resolution[0] / 2, self.resolution[1] / 2)
         self.ingame_pos = [0, 0]
         self.templates_and_masks = self.load_templates()
+        self.accepted_node_strings = self.generate_good_strings(mod_files)
+
 
     def eval_jewel(self, item_location):
         item_stats = {}
@@ -91,15 +105,23 @@ class TreeNavigator:
         item_desc = self._setup(item_location, copy=True)
         self.log.info('Analyzing %s' % item_desc)
 
+        #pool = Pool(self.config['ocr_threads'])
+        jobs = []
         #for socket_id in sorted(SOCKETS.keys()):
-        for socket_id in [3]:
+        for socket_id in [1, 3]:
             self._move_screen_to_socket(socket_id)
-            item_stats[socket_id] = self._analyze_nodes(socket_id)
+            socket_nodes = self._analyze_nodes(socket_id)
+            socket_nodes = OCR.nodes_to_strings(socket_nodes)
+            socket_nodes = self._filter_ocr_lines(socket_nodes)
+            self.log.info(socket_nodes)
+            item_stats[socket_id] = socket_nodes
             # Convert stats for the socket from image to lines in separate process
+            #jobs.append({socket_id: pool.apply_async(OCR.nodes_to_string, socket_nodes)})
 
+        #results = [socket_id: jobs[socket_id].get(timeout=120) for socket_id in jobs]
         self._setup(item_location)
         self.log.info('Analyzed %s' % item_desc)
-        return
+        return item_desc, item_stats
 
     def load_templates(self, threshold = 128):
         templates_and_masks = {}
@@ -133,11 +155,15 @@ class TreeNavigator:
         self.input_handler.rnd_sleep(min=1000, mean=1000)
         self.ingame_pos = [tree_pos_x, tree_pos_y]
 
-    def _click_socket(self, socket_id):
+    def _click_socket(self, socket_id, insert=True):
+
         self.log.info('Clicking socket %s' % socket_id)
         tree_pos_x, tree_pos_y = SOCKETS[socket_id]
         xy = self._tree_pos_to_xy([tree_pos_x, tree_pos_y])
-        self.input_handler.click(*xy, *xy, button='left', raw=True)
+        if insert:
+            self.input_handler.click(*xy, *xy, button='left', raw=True)
+        else:
+            self.input_handler.click(*xy, *xy, button='right', raw=True)
         self.input_handler.rnd_sleep(min=1000, mean=1000)
 
     def _tree_pos_to_xy(self, pos):
@@ -157,9 +183,17 @@ class TreeNavigator:
             node_stats = self._get_node_data(location)
             node = {'location': location, 'stats': node_stats}
             nodes.append(node)
-        self._click_socket(socket_id)
+        self._click_socket(socket_id, insert=False)
         return nodes
 
+    def _filter_ocr_lines(self, nodes_lines):
+        filtered_nodes = []
+        for node in nodes_lines:
+            filtered_stats = [l for l in node['stats'] if
+                              self._filter_nonalpha(l) in self.accepted_node_strings]
+            filtered_nodes.append({'location': node['location'],
+                                   'stats': filtered_stats})
+        return filtered_nodes
 
     def _find_nodes(self, socket_id):
         socket_pos = self._tree_pos_to_xy(SOCKETS[socket_id])
@@ -224,7 +258,15 @@ class TreeNavigator:
         return abs_node_pos
 
     def _get_node_data(self, location):
-        return 0
+        self.log.info('Getting node stats at location %s' % location)
+        self.input_handler.click(*location, *location, button=None, raw=True, speed_factor=3)
+        textbox_lt = location + TEXTBOX_MOUSE_OFFSET
+        textbox_rb = textbox_lt + [TXT_BOX['w'], TXT_BOX['h']]
+
+
+        jewel_area_bgr = grab_screen(tuple(np.concatenate([textbox_lt, textbox_rb])))
+        return jewel_area_bgr
+
 
     def _setup(self, item_location, copy=False):
         item_desc = None
@@ -242,6 +284,27 @@ class TreeNavigator:
         self.input_handler.rnd_sleep(min=50, mean=150)
         return item_desc
 
+    def generate_good_strings(self, files):
+        mods = set()
+        for name in files:
+            path = files[name]
+            with open(path) as f:
+                data = json.load(f)
+                if isinstance(data, dict):
+                    mods.update([self._filter_nonalpha(k) for k in data.keys()])
+                    for key in data.keys():
+                        if isinstance(data[key]['passives'][0], list):
+                            mods.update([self._filter_nonalpha(e) for e in data[key]['passives'][0]])
+                        else:
+                            mods.update([self._filter_nonalpha(e) for e in data[key]['passives']])
+                else:
+                    mods.update([self._filter_nonalpha(e) for e in data])
+        mods.remove('')
+        return mods
+
+    def _filter_nonalpha(self, value):
+        return ''.join(list(filter(lambda x: x.isalpha(), value)))
+
 # Adapted from https://github.com/klayveR/python-poe-timeless-jewel
 class OCR:
     @staticmethod
@@ -255,6 +318,7 @@ class OCR:
         src = cv2.resize(src, (int(srcW * 1.5), int(srcH * 1.5)))
 
         # HSV thresholding to get rid of as much background as possible
+        src = cv2.cvtColor(src, cv2.COLOR_BGRA2BGR)
         hsv = cv2.cvtColor(src.copy(), cv2.COLOR_BGR2HSV)
         lower_blue = np.array([0, 0, 180])
         upper_blue = np.array([180, 38, 255])
@@ -263,7 +327,6 @@ class OCR:
         b, g, r = cv2.split(result)
         g = OCR.clahe(g, 5, (5, 5))
         inverse = cv2.bitwise_not(g)
-
         return inverse
 
     @staticmethod
@@ -272,5 +335,15 @@ class OCR:
             config='--oem 3 --psm 12 poe')
         t = t.replace("\n\n", "\n")
         lines = t.split("\n")
-
         return lines
+
+    @staticmethod
+    def nodes_to_strings(nodes):
+        converted_nodes = []
+        for node in nodes:
+            img = node['stats']
+            filt_img = OCR.getFilteredImage(img)
+            text = OCR.imageToStringArray(img)
+            converted_nodes.append({'location': node['location'],
+                                    'stats': text})
+        return converted_nodes
