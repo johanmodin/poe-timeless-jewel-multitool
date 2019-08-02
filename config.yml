@@ -7,3 +7,5 @@ input_handler:
     mouse_click_interval: 300
 trader:
     log_path: 'C:\Program Files (x86)\Grinding Gear Games\Path of Exile\logs\Client.txt'
+tree_nav:
+    ocr_threads: 4

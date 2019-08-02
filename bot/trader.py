@@ -188,7 +188,7 @@ class Trader:
         return False
 
     def _trade_window_open(self):
-        img_bgr = grab_screen((0, 0, self.resolution[0], self.resolution[1]))
+        img_bgr = grab_screen((0, 0, *self.resolution))
         img_rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGRA2RGB)
         target_color = (183, 125, 66)
         x = int(0.29765 * self.resolution[0])
@@ -221,7 +221,7 @@ class Trader:
         self.input_handler.click(0.18086, 0.76041, 0.19148, 0.7607)
 
     def _partner_has_accepted(self):
-        img_bgr = grab_screen((0, 0, self.resolution[0], self.resolution[1]))
+        img_bgr = grab_screen((0, 0, *self.resolution))
         img_rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGRA2RGB)
         target_color = (49, 62, 42)
         x = int(0.32617 * self.resolution[0])
@@ -232,7 +232,7 @@ class Trader:
 
     def find_nonempty_inventory_slots(self, origin):
         slots = np.zeros((12, 5))
-        img_bgr = grab_screen((0, 0, self.resolution[0], self.resolution[1]))
+        img_bgr = grab_screen((0, 0, *self.resolution))
         img_rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGRA2RGB)
         target_color = (0, 0, 0)
         for x_idx in range(12):
@@ -259,7 +259,7 @@ class Trader:
         return distance < max_distance
 
     def _find_stash(self):
-        img_rgb = grab_screen((0, 0, self.resolution[0], self.resolution[1]))
+        img_rgb = grab_screen((0, 0, *self.resolution))
         img_gray = cv2.cvtColor(img_rgb, cv2.COLOR_RGBA2GRAY)
         template = cv2.imread('data/images/stash.png', 0)
         res = cv2.matchTemplate(img_gray, template, cv2.TM_CCOEFF_NORMED)
