@@ -4,6 +4,4 @@ pyautogui
 numpy
 pypiwin32
 opencv-contrib-python
-matplotlib
-python-Levenshtein-wheels
 pytesseract
