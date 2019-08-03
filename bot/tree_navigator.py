@@ -63,15 +63,15 @@ X_SCALE = 0.2
 Y_SCALE = 0.2
 NODE_TEMPLATE_THRESHOLD = 0.1
 TEXTBOX_MOUSE_OFFSET = [32, 0]
-CIRCLE_EFFECTIVE_RADIUS = 300
+CIRCLE_EFFECTIVE_RADIUS = 295
 
 IMAGE_FOLDER = 'data/images/'
-TEMPLATES = {'Notable.png': {'size': (30, 30), 'threshold': 0.8},
-             'NotableAllocated.png': {'size': (30, 30), 'threshold': 0.9},
-             'Jewel.png': {'size': (30, 30), 'threshold': 0.87},
-             'JewelSocketed.png': {'size': (30, 30), 'threshold': 0.85},
+TEMPLATES = {'Notable.png': {'size': (30, 30), 'threshold': 0.89},
+             'NotableAllocated.png': {'size': (30, 30), 'threshold': 0.93},
+             'Jewel.png': {'size': (30, 30), 'threshold': 0.92},
+             'JewelSocketed.png': {'size': (30, 30), 'threshold': 0.9},
              'Skill.png': {'size': (21, 21), 'threshold': 0.87},
-             'SkillAllocated.png': {'size': (21, 21), 'threshold':  0.92}}
+             'SkillAllocated.png': {'size': (21, 21), 'threshold':  0.93}}
 
 TXT_BOX = {'x': 30, 'y': 0, 'w': 900, 'h': 320}
 
@@ -112,7 +112,7 @@ class TreeNavigator:
             self._move_screen_to_socket(socket_id)
             time.sleep(1)
             socket_nodes = self._analyze_nodes(socket_id)
-            
+
             # Convert stats for the socket from image to lines in separate process
             jobs[socket_id] = pool.map_async(OCR.node_to_strings, socket_nodes)
             self.log.info('Analyzed socket %s' % socket_id)
@@ -163,7 +163,7 @@ class TreeNavigator:
             self.input_handler.click(*xy, *xy, button='left', raw=True)
         else:
             self.input_handler.click(*xy, *xy, button='right', raw=True)
-        self.input_handler.rnd_sleep(min=100, mean=200, sigma=100)
+        self.input_handler.rnd_sleep(min=100, mean=200)
 
     def _tree_pos_to_xy(self, pos):
         uncentered_xy =  [(pos[0] - self.ingame_pos[0]) * X_SCALE,
@@ -216,12 +216,13 @@ class TreeNavigator:
         nodes = self._get_node_locations_from_screen((x1, y1, x2, y2))
         nodes = self._filter_nodes(nodes, socket_pos)
 
+
+
         return nodes, socket_pos
 
     def _find_socket(self, socket_pos, side_len=100):
         lt = [int(socket_pos[0] - side_len / 2), int(socket_pos[1] - side_len / 2)]
         rb = [lt[0] + side_len, lt[1] + side_len]
-        self.input_handler.click(1280, 100, 1300, 120, button=None, raw=True)
         socket_area = grab_screen(tuple(lt + rb))
         socket_area = cv2.cvtColor(socket_area, cv2.COLOR_BGR2GRAY)
 
@@ -238,11 +239,7 @@ class TreeNavigator:
 
         socket_offset = [int(rel_node_pos[0][0] - side_len / 2),
                          int(rel_node_pos[0][1] - side_len / 2)]
-
-
         return socket_offset
-
-
 
     def _filter_nodes(self, nodes, socket_pos, duplicate_min_dist=10):
         # filter duplicate nodes
@@ -260,7 +257,6 @@ class TreeNavigator:
         nodes = nodes[distances_to_socket <= CIRCLE_EFFECTIVE_RADIUS]
         return nodes
 
-
     def _get_node_locations_from_screen(self, box):
         jewel_area_bgr = grab_screen(box)
         jewel_area_gray = cv2.cvtColor(jewel_area_bgr, cv2.COLOR_BGR2GRAY)
@@ -274,6 +270,13 @@ class TreeNavigator:
         rel_node_pos_yx = np.argwhere(locations == 1)
         rel_node_pos = rel_node_pos_yx.T[::-1].T
         abs_node_pos = rel_node_pos + [box[0], box[1]]
+
+
+        for pt in rel_node_pos:
+            cv2.rectangle(jewel_area_bgr, (pt[0]-2, pt[1]-2), (pt[0] + 2, pt[1] + 2), (0,0,255), 2)
+        cv2.imshow('jew_area',  jewel_area_bgr)
+        cv2.waitKey()
+
         return abs_node_pos
 
     def _match_image(self, screen, template_name):
