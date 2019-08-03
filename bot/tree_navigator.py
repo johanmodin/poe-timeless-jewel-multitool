@@ -108,13 +108,13 @@ class TreeNavigator:
 
         pool = Pool(self.config['ocr_threads'])
         jobs = {}
-        #for socket_id in sorted(SOCKETS.keys()):
-        for socket_id in [4,11, 12, 13,14,15,16,17,18,19,20,21]:
+        for socket_id in sorted(SOCKETS.keys()):
             self._move_screen_to_socket(socket_id)
             time.sleep(1)
-            #socket_nodes = self._analyze_nodes(socket_id)
+            socket_nodes = self._analyze_nodes(socket_id)
+            
             # Convert stats for the socket from image to lines in separate process
-            #jobs[socket_id] = pool.map_async(OCR.node_to_strings, socket_nodes)
+            jobs[socket_id] = pool.map_async(OCR.node_to_strings, socket_nodes)
             self.log.info('Analyzed socket %s' % socket_id)
 
         self._setup(item_location)
