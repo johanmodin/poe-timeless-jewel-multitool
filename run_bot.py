@@ -1,4 +1,4 @@
 from bot.bot import Bot
-
-b = Bot()
-b.loop()
+if __name__ == '__main__':
+    b = Bot()
+    b.loop()

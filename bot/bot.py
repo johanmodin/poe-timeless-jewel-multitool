@@ -34,10 +34,11 @@ class Bot:
             if not successfully_received:
                 continue
             '''
-            jewels = []
-            jewel_locations = self.trader.get_jewel_locations()
-            self.log.info('Got new jewels at %s' % jewel_locations)
-            for jewel_location in jewel_locations:
+            #jewels = []
+            #jewel_locations = self.trader.get_jewel_locations()
+            #self.log.info('Got new jewels at %s' % jewel_locations)
+            #for jewel_location in jewel_locations:
+            for jewel_location in [[0, 0]]:
                 description, stats = self.tree_nav.eval_jewel(jewel_location)
                 jewels.append((description, stats))
 

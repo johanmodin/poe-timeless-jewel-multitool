@@ -40,23 +40,23 @@ MOVE_POS = {
 1: (-650.565, -226.013),
 2: (648.905, -246.45),
 3: (6.3354, 915.658),
-4: (-1719.9, 1774.17),
+4: (-1719.9, 2274.17),
 5: (-2470.66, -106.1434),
 6: (-1549.02, -2464.39),
 7: (1695.53, -2377.1),
 8: (2800.84, 81.5361),
 9: (1334.37, 2500.76),
 10: (3.12471, 5195.44),
-11: (-4822.19, 4244.92),
-12: (-5446.86, 1991.42),
-13: (-5886.95, -203.7007),
+11: (-4000.19, 5044.92),
+12: (-5395.86, 2420.42),
+13: (-5886.95, 113.7007),
 14: (-5644.59, -2155.18),
 15: (-3144.14, -5558.87),
-16: (200.10728, -5336.32),
-17: (3522.05, -5287.21), #
-18: (5454.2, -2502.75),
+16: (300.10728, -5336.32),
+17: (3522.05, -4687.21), #
+18: (5454.2, -2002.75),
 19: (5465.24, 41.3341),
-20: (5068.94, 2921.07),
+20: (5068.94, 2121.07),
 21: (3372.76, 5112.5)}
 
 X_SCALE = 0.2
@@ -66,8 +66,10 @@ TEXTBOX_MOUSE_OFFSET = [32, 0]
 CIRCLE_EFFECTIVE_RADIUS = 300
 
 IMAGE_FOLDER = 'data/images/'
-TEMPLATES = {'Notable.png': {'size': (32, 32), 'threshold': 0.8},
-             'NotableAllocated.png': {'size': (32, 32), 'threshold': 0.9},
+TEMPLATES = {'Notable.png': {'size': (30, 30), 'threshold': 0.8},
+             'NotableAllocated.png': {'size': (30, 30), 'threshold': 0.9},
+             'Jewel.png': {'size': (30, 30), 'threshold': 0.87},
+             'JewelSocketed.png': {'size': (30, 30), 'threshold': 0.85},
              'Skill.png': {'size': (21, 21), 'threshold': 0.87},
              'SkillAllocated.png': {'size': (21, 21), 'threshold':  0.92}}
 
@@ -96,31 +98,30 @@ class TreeNavigator:
         self.origin_pos = (self.resolution[0] / 2, self.resolution[1] / 2)
         self.ingame_pos = [0, 0]
         self.templates_and_masks = self.load_templates()
-        self.accepted_node_strings = self.generate_good_strings(mod_files)
-
+        self.passive_mods, self.passive_names = self.generate_good_strings(mod_files)
+        self.accepted_node_strings = self.passive_mods.union(self.passive_names)
 
     def eval_jewel(self, item_location):
-        item_stats = {}
         self.ingame_pos = [0, 0]
         item_desc = self._setup(item_location, copy=True)
         self.log.info('Analyzing %s' % item_desc)
 
-        #pool = Pool(self.config['ocr_threads'])
-        jobs = []
+        pool = Pool(self.config['ocr_threads'])
+        jobs = {}
         #for socket_id in sorted(SOCKETS.keys()):
-        for socket_id in [1, 3]:
+        for socket_id in [4,11, 12, 13,14,15,16,17,18,19,20,21]:
             self._move_screen_to_socket(socket_id)
-            socket_nodes = self._analyze_nodes(socket_id)
-            socket_nodes = OCR.nodes_to_strings(socket_nodes)
-            socket_nodes = self._filter_ocr_lines(socket_nodes)
-            self.log.info(socket_nodes)
-            item_stats[socket_id] = socket_nodes
+            time.sleep(1)
+            #socket_nodes = self._analyze_nodes(socket_id)
             # Convert stats for the socket from image to lines in separate process
-            #jobs.append({socket_id: pool.apply_async(OCR.nodes_to_string, socket_nodes)})
+            #jobs[socket_id] = pool.map_async(OCR.node_to_strings, socket_nodes)
+            self.log.info('Analyzed socket %s' % socket_id)
 
-        #results = [socket_id: jobs[socket_id].get(timeout=120) for socket_id in jobs]
         self._setup(item_location)
         self.log.info('Analyzed %s' % item_desc)
+
+        item_stats = [{socket_id: self._filter_ocr_lines(jobs[socket_id].get(timeout=120))} for socket_id in jobs]
+        self.log.info(item_stats)
         return item_desc, item_stats
 
     def load_templates(self, threshold = 128):
@@ -129,20 +130,20 @@ class TreeNavigator:
             template_path = os.path.join(IMAGE_FOLDER, template_name)
             img = cv2.imread(template_path, cv2.IMREAD_UNCHANGED)
 
-            channels = cv2.split(img)
-            mask = np.array(channels[3])
-
-            mask[mask <= threshold] = 0
-            mask[mask > threshold] = 255
-            img = cv2.imread(template_path, 0)
-
             size = TEMPLATES[template_name]['size']
+            channels = cv2.split(img)
+            mask = None
+            if len(channels) > 3:
+                mask = np.array(channels[3])
+
+                mask[mask <= threshold] = 0
+                mask[mask > threshold] = 255
+                mask = cv2.resize(mask, size)
+
+            img = cv2.imread(template_path, 0)
             img = cv2.resize(img, size)
-            mask = cv2.resize(mask, size)
             templates_and_masks[template_name] = {'image':img, 'mask': mask}
         return templates_and_masks
-
-
 
     def _move_screen_to_socket(self, socket_id):
         self.log.info('Moving close to socket %s' % socket_id)
@@ -155,35 +156,33 @@ class TreeNavigator:
         self.input_handler.rnd_sleep(min=1000, mean=1000)
         self.ingame_pos = [tree_pos_x, tree_pos_y]
 
-    def _click_socket(self, socket_id, insert=True):
-
-        self.log.info('Clicking socket %s' % socket_id)
-        tree_pos_x, tree_pos_y = SOCKETS[socket_id]
-        xy = self._tree_pos_to_xy([tree_pos_x, tree_pos_y])
+    def _click_socket(self, socket_pos, insert=True):
+        self.log.info('Clicking socket')
+        xy = socket_pos
         if insert:
             self.input_handler.click(*xy, *xy, button='left', raw=True)
         else:
             self.input_handler.click(*xy, *xy, button='right', raw=True)
-        self.input_handler.rnd_sleep(min=1000, mean=1000)
+        self.input_handler.rnd_sleep(min=100, mean=200, sigma=100)
 
     def _tree_pos_to_xy(self, pos):
         uncentered_xy =  [(pos[0] - self.ingame_pos[0]) * X_SCALE,
                (pos[1] - self.ingame_pos[1]) * Y_SCALE]
-        xy = [uncentered_xy[0] + self.origin_pos[0],
-              uncentered_xy[1] + self.origin_pos[1]]
+        xy = [int(uncentered_xy[0] + self.origin_pos[0]),
+              int(uncentered_xy[1] + self.origin_pos[1])]
         return xy
 
     def _analyze_nodes(self, socket_id):
         self.log.info('Analyzing nodes for socket id %s' % socket_id)
         nodes = []
-        node_locations = self._find_nodes(socket_id)
+        node_locations, socket_pos = self._find_nodes(socket_id)
         self.log.info('Found %s nodes for socket id %s' % (len(node_locations), socket_id))
-        self._click_socket(socket_id)
+        self._click_socket(socket_pos)
         for location in node_locations:
             node_stats = self._get_node_data(location)
             node = {'location': location, 'stats': node_stats}
             nodes.append(node)
-        self._click_socket(socket_id, insert=False)
+        self._click_socket(socket_pos, insert=False)
         return nodes
 
     def _filter_ocr_lines(self, nodes_lines):
@@ -191,32 +190,59 @@ class TreeNavigator:
         for node in nodes_lines:
             filtered_stats = [l for l in node['stats'] if
                               self._filter_nonalpha(l) in self.accepted_node_strings]
+            name = [l for l in filtered_stats if
+                    self._filter_nonalpha(l) in self.passive_names]
+            mods = [l for l in filtered_stats if
+                    self._filter_nonalpha(l) in self.passive_mods]
             filtered_nodes.append({'location': node['location'],
-                                   'stats': filtered_stats})
+                                   'name': name,
+                                   'mods': mods})
         return filtered_nodes
 
     def _find_nodes(self, socket_id):
+        self.input_handler.click(1280, 100, 1300, 120, button=None, raw=True)
         socket_pos = self._tree_pos_to_xy(SOCKETS[socket_id])
+        socket_offset = self._find_socket(socket_pos)
+        self.log.info('Jewel socket offset correction: %s' % socket_offset)
+
+        socket_pos[0] += socket_offset[0]
+        socket_pos[1] += socket_offset[1]
+
         x1 = int(socket_pos[0] - CIRCLE_EFFECTIVE_RADIUS)
         y1 = int(socket_pos[1] - CIRCLE_EFFECTIVE_RADIUS)
         x2 = int(x1 + 2 * CIRCLE_EFFECTIVE_RADIUS)
         y2 = int(y1 + 2 * CIRCLE_EFFECTIVE_RADIUS)
-        xy = self._tree_pos_to_xy(MOVE_POS[socket_id])
-        self.input_handler.click(*xy, *xy, button=None, raw=True)
 
         nodes = self._get_node_locations_from_screen((x1, y1, x2, y2))
         nodes = self._filter_nodes(nodes, socket_pos)
 
-        '''
-        jewel_area_bgr = grab_screen((x1, y1, x2, y2))
-        for pt in nodes:
-            pt -= [x1, y1]
-            cv2.rectangle(jewel_area_bgr, (pt[0]-2, pt[1]-2), (pt[0] + 2, pt[1] + 2), (0,0,255), 2)
-        cv2.imshow('nodes', jewel_area_bgr)
-        cv2.waitKey()
-        '''
+        return nodes, socket_pos
 
-        return nodes
+    def _find_socket(self, socket_pos, side_len=100):
+        lt = [int(socket_pos[0] - side_len / 2), int(socket_pos[1] - side_len / 2)]
+        rb = [lt[0] + side_len, lt[1] + side_len]
+        self.input_handler.click(1280, 100, 1300, 120, button=None, raw=True)
+        socket_area = grab_screen(tuple(lt + rb))
+        socket_area = cv2.cvtColor(socket_area, cv2.COLOR_BGR2GRAY)
+
+        locations = np.zeros((side_len, side_len))
+
+        for template_name in ['Jewel.png', 'JewelSocketed.png']:
+            centered_coordinates = self._match_image(socket_area, template_name)
+            locations[centered_coordinates] = 1
+
+        rel_node_pos_yx = np.argwhere(locations == 1)
+        rel_node_pos = rel_node_pos_yx.T[::-1].T
+        if len(rel_node_pos) > 1:
+            self.log.warning('Socketed offset compensator found several sockets! Check threshold.')
+
+        socket_offset = [int(rel_node_pos[0][0] - side_len / 2),
+                         int(rel_node_pos[0][1] - side_len / 2)]
+
+
+        return socket_offset
+
+
 
     def _filter_nodes(self, nodes, socket_pos, duplicate_min_dist=10):
         # filter duplicate nodes
@@ -241,21 +267,28 @@ class TreeNavigator:
 
         locations = np.zeros((CIRCLE_EFFECTIVE_RADIUS * 2, CIRCLE_EFFECTIVE_RADIUS * 2))
 
-        for idx, template_name in enumerate(self.templates_and_masks.keys()):
-            template = self.templates_and_masks[template_name]['image']
-            mask = self.templates_and_masks[template_name]['mask']
-            res = cv2.matchTemplate(jewel_area_gray, template, cv2.TM_CCORR_NORMED, mask=mask)
-            coordinates = np.where(res >= TEMPLATES[template_name]['threshold'])
-            icon_size = TEMPLATES[template_name]['size']
-            icon_center_offset = [int(icon_size[0] / 2), int(icon_size[1] / 2)]
-            centered_coordinates = [coordinates[0] + icon_center_offset[0],
-                                    coordinates[1] + icon_center_offset[1]]
+        for template_name in ['Notable.png', 'NotableAllocated.png', 'Skill.png', 'SkillAllocated.png']:
+            centered_coordinates = self._match_image(jewel_area_gray, template_name)
             locations[centered_coordinates] = 1
 
         rel_node_pos_yx = np.argwhere(locations == 1)
         rel_node_pos = rel_node_pos_yx.T[::-1].T
         abs_node_pos = rel_node_pos + [box[0], box[1]]
         return abs_node_pos
+
+    def _match_image(self, screen, template_name):
+        template = self.templates_and_masks[template_name]['image']
+        mask = self.templates_and_masks[template_name]['mask']
+        res = cv2.matchTemplate(screen, template, cv2.TM_CCORR_NORMED, mask=mask)
+        self.log.info(np.max(res))
+        self.log.info(template_name)
+        coordinates = np.where(res >= TEMPLATES[template_name]['threshold'])
+        icon_size = TEMPLATES[template_name]['size']
+        icon_center_offset = [int(icon_size[0] / 2), int(icon_size[1] / 2)]
+        centered_coordinates = [coordinates[0] + icon_center_offset[0],
+                                coordinates[1] + icon_center_offset[1]]
+        return centered_coordinates
+
 
     def _get_node_data(self, location):
         self.log.info('Getting node stats at location %s' % location)
@@ -286,12 +319,13 @@ class TreeNavigator:
 
     def generate_good_strings(self, files):
         mods = set()
+        names = set()
         for name in files:
             path = files[name]
             with open(path) as f:
                 data = json.load(f)
                 if isinstance(data, dict):
-                    mods.update([self._filter_nonalpha(k) for k in data.keys()])
+                    names.update([self._filter_nonalpha(k) for k in data.keys()])
                     for key in data.keys():
                         if isinstance(data[key]['passives'][0], list):
                             mods.update([self._filter_nonalpha(e) for e in data[key]['passives'][0]])
@@ -300,7 +334,7 @@ class TreeNavigator:
                 else:
                     mods.update([self._filter_nonalpha(e) for e in data])
         mods.remove('')
-        return mods
+        return mods, names
 
     def _filter_nonalpha(self, value):
         return ''.join(list(filter(lambda x: x.isalpha(), value)))
@@ -338,12 +372,8 @@ class OCR:
         return lines
 
     @staticmethod
-    def nodes_to_strings(nodes):
-        converted_nodes = []
-        for node in nodes:
-            img = node['stats']
-            filt_img = OCR.getFilteredImage(img)
-            text = OCR.imageToStringArray(img)
-            converted_nodes.append({'location': node['location'],
-                                    'stats': text})
-        return converted_nodes
+    def node_to_strings(node):
+        img = node['stats']
+        filt_img = OCR.getFilteredImage(img)
+        text = OCR.imageToStringArray(filt_img)
+        return {'location': node['location'], 'stats': text}
