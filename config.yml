@@ -4,7 +4,7 @@ bot:
     resolution: '2560x1440'
 input_handler:
     key_press_interval: 200
-    mouse_click_interval: 300
+    mouse_click_interval: 200
 trader:
     log_path: 'C:\Program Files (x86)\Grinding Gear Games\Path of Exile\logs\Client.txt'
 tree_nav:

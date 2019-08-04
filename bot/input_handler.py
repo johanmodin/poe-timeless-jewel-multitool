@@ -16,7 +16,7 @@ class InputHandler:
         self.res_h = resolution[1]
         self.config = get_config('input_handler')
 
-    def click(self, x_top,  y_top, x_bot, y_bot, button='left', speed_factor=1, raw=False):
+    def click(self, x_top,  y_top, x_bot, y_bot, button='left', speed_factor=3, raw=False):
         if not raw:
             x_top *= self.res_w
             x_bot *= self.res_w
@@ -61,8 +61,8 @@ class InputHandler:
         ny = int(y*65535/win32api.GetSystemMetrics(1))
         win32api.mouse_event(win32con.MOUSEEVENTF_ABSOLUTE|win32con.MOUSEEVENTF_MOVE,nx,ny)
 
-    def rnd_sleep(self, min=50, mean=300):
-        time.sleep(self._rnd(min, mean) / 1000)
+    def rnd_sleep(self, min=50, mean=300, sigma=300):
+        time.sleep(self._rnd(min, mean, sigma=sigma) / 1000)
 
     def _rnd(self, min, mean, sigma=500):
         r = np.random.normal(mean, sigma)
@@ -70,7 +70,7 @@ class InputHandler:
             r = np.random.normal(mean, sigma)
         return r
 
-    def inventory_click(self, slot_x, slot_y, inventory_base, ctrl_click=False, button='left', speed_factor=1):
+    def inventory_click(self, slot_x, slot_y, inventory_base, ctrl_click=False, button='left', speed_factor=2):
         if ctrl_click:
             self._press_keys([0x1d])
         self.click(inventory_base[0] + slot_x * 0.02735,
@@ -103,8 +103,8 @@ class InputHandler:
         self.click(0.499, 0.499, 0.501, 0.501, button=None)
         win32api.mouse_event(win32con.MOUSEEVENTF_WHEEL, dx, dy, clicks, 0)
 
-    def drag(self, x, y, delta=False):
+    def drag(self, x, y, delta=False, speed_factor=1):
         if delta:
-            pyautogui.drag(x, y, self._rnd(min=500, mean=500, sigma=50) / 1000, pyautogui.easeOutQuad, button='left')
+            pyautogui.drag(x, y, self._rnd(min=500 / speed_factor, mean=500 / speed_factor, sigma=50 / speed_factor) / 1000, pyautogui.easeOutQuad, button='left')
         else:
-            pyautogui.dragTo(x, y, self._rnd(min=500, mean=500, sigma=50) / 1000, pyautogui.easeOutQuad, button='left')
+            pyautogui.dragTo(x, y, self._rnd(min=500 / speed_factor, mean=500 / speed_factor, sigma=50 / speed_factor) / 1000, pyautogui.easeOutQuad, button='left')
