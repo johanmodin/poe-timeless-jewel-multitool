@@ -143,7 +143,8 @@ class TreeNavigator:
         self._setup(item_location)
         self.log.info('Analyzed %s' % item_desc)
 
-        item_stats = [{'socket_' + str(socket_id): self._filter_ocr_lines(jobs[socket_id].get(timeout=120))}
+        item_stats = [{'socket_id': socket_id,
+                       'socket_nodes': self._filter_ocr_lines(jobs[socket_id].get(timeout=120))}
                       for socket_id in jobs]
         pool.close()
         pool.join()

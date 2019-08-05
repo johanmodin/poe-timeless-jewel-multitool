@@ -136,6 +136,7 @@ class Trader:
         self.input_handler.click_hotkey('i')
         slots = self.find_nonempty_inventory_slots(origin=OWN_INVENTORY_ORIGIN)
         item_locations = np.argwhere(slots == 1)
+        jewel_descriptions = []
         for item_location in item_locations:
             item = self.input_handler.inventory_copy(item_location[0], item_location[1], OWN_INVENTORY_ORIGIN, speed_factor=2)
             item_type = item.split('\n')[2].strip()
@@ -146,9 +147,10 @@ class Trader:
             else:
                 item_desc = item.split('\n')[9].strip()
                 self.log.info('Received jewel: %s' % item_desc)
+                jewel_descriptions.append(item_desc)
         jewel_locations = np.argwhere(slots == 1)
         self.input_handler.click_hotkey('i')
-        return jewel_locations
+        return jewel_locations, jewel_descriptions
 
     def return_items(self, username, locations):
         self.log.info('Trying to do a return trade with %s' % username)

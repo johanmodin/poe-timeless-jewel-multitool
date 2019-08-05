@@ -20,7 +20,7 @@ class Bot:
 
         self.trader = Trader(self.resolution)
         self.input_handler = InputHandler(self.resolution)
-        self.db = MongoClient(self.config['db_url'])['project_timeless_test2']
+        self.db = MongoClient(self.config['db_url'])['project_timeless_test4']
         self.run = True
 
     def loop(self):
@@ -36,32 +36,33 @@ class Bot:
             if not successfully_received:
                 continue
             '''
-            jewel_locations = self.trader.get_jewel_locations()
-            self.log.info('Got %s new jewels at %s' % (len(jewel_locations), jewel_locations))
-            for jewel_location in jewel_locations:
+            jewel_locations, descriptions = self.trader.get_jewel_locations()
+            self.log.info('Got %s new jewels' % len(jewel_locations))
+            long_break_at_idx = [8, 23, 44]
+            for idx, jewel_location in enumerate(jewel_locations):
+                if idx in long_break_at_idx:
+                    self.input_handler.rnd_sleep(mean=120000, sigma=30000, min=60000)
+                stored_equivalents = self.db['jewels'].find({'description': descriptions[idx]})
+                if stored_equivalents.count() > 0:
+                    self.log.info('Jewel with descriptions %s is already analyzed, skipping!' % descriptions[idx])
+                    continue
                 self.tree_nav = TreeNavigator(self.resolution)
-                t1 = time.time()
-                name, description, stats = self.tree_nav.eval_jewel(jewel_location)
-                t2 = time.time()
-                self.log.info('Jewel evaluation took %s seconds' % (t2-t1))
-                self.store_items([(name, description, stats)], username)
+                analysis_time = datetime.utcnow()
+                name, description, socket_instances = self.tree_nav.eval_jewel(jewel_location)
+                self.log.info('Jewel evaluation took %s seconds' % (datetime.utcnow() - analysis_time).seconds)
+                for socket in socket_instances:
+                    socket['description'] = description
+                    socket['name'] = name
+                    socket['created'] = analysis_time
+                    socket['reporter'] = username
+
+                self.store_items(socket_instances)
 
             sys.exit(0)
             #self.trader.return_items(username, jewel_locations)
 
-    def store_items(self, items, reporter):
-        item_list = []
-        creation_time = datetime.utcnow()
-        for item in items:
-            new_item = {}
-            name, description, jewel_stats = item
-            new_item['description'] = description
-            new_item['name'] = name
-            new_item['stats'] = jewel_stats
-            new_item['reporter'] = reporter
-            new_item['created'] = creation_time
-            item_list.append(new_item)
-        result = self.db['jewels'].insert_many(item_list)
+    def store_items(self, socket_instances):
+        result = self.db['jewels'].insert_many(socket_instances)
         return result
 
     def split_res(self, resolution):
