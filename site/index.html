@@ -5,7 +5,7 @@
 	<title></title>
 	<link rel="stylesheet" type="text/css" media="screen" href="https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.min.css" />
 	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script>
-    <script type="text/javascript" src="/static/realtime.js"></script>
+    <script type="text/javascript" src="/static/update.js"></script>
 
 <style>
 	.nine_columns {
@@ -24,6 +24,16 @@
 		margin: 10px;
 		padding: 5px;
 		background: #fff;
+
+	}
+
+	.focus_mod {
+		border: 1px solid;
+		border-radius: 3px;
+		display: inline-block;
+		margin: 10px;
+		padding: 5px;
+		background: #7c9d67;
 
 	}
 
@@ -90,13 +100,13 @@
                 <h1>Timeless Jewel Search</h1>
 								<div class="topnav">
 								  <input type="text" id="kw_input" placeholder="Jewel keywords..">
-									<button onclick="doPoll()" type="submit">Search</button>
+									<button onclick="search()" type="submit">Search</button>
 								</div>
             </div>
         </div>
 
         <div class="row">
-            <div  id="realtime">
+            <div  id="jewel_list">
                 <div class="row">
 
                 </div>
