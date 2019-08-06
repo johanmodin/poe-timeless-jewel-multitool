@@ -38,10 +38,10 @@ class Bot:
             '''
             jewel_locations, descriptions = self.trader.get_jewel_locations()
             self.log.info('Got %s new jewels' % len(jewel_locations))
-            long_break_at_idx = [8, 23, 44]
+            long_break_at_idx = [8, 15, 23, 35, 42, 54]
             for idx, jewel_location in enumerate(jewel_locations):
                 if idx in long_break_at_idx:
-                    self.input_handler.rnd_sleep(mean=120000, sigma=30000, min=60000)
+                    self.input_handler.rnd_sleep(mean=300000, sigma=100000, min=120000)
                 stored_equivalents = self.db['jewels'].find({'description': descriptions[idx]})
                 if stored_equivalents.count() > 0:
                     self.log.info('Jewel with descriptions %s is already analyzed, skipping!' % descriptions[idx])

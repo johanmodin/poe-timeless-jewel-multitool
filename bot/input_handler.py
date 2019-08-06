@@ -25,12 +25,13 @@ class InputHandler:
 
         x = x_top + random() * (x_bot - x_top)
         y = y_top + random() * (x_bot - x_top)
-        pyautogui.moveTo(x, y, self._rnd(min=100 / speed_factor, mean=150 / speed_factor,
-                         sigma=100 / speed_factor) / 1000,
+        pyautogui.moveTo(x, y, self._rnd(min=100 / speed_factor,
+                                         mean=150 / speed_factor,
+                                         sigma=100 / speed_factor) / 1000,
                          pyautogui.easeOutQuad)
         self._hw_move(x, y)
-        self.rnd_sleep(mean=self.config['mouse_click_interval'] / speed_factor)
         if button is not None:
+            self.rnd_sleep(mean=self.config['mouse_click_interval'] / speed_factor)
             pyautogui.click(x=None, y=None, button=button)
 
     def click_keys(self, keys):
@@ -73,17 +74,17 @@ class InputHandler:
     def inventory_click(self, slot_x, slot_y, inventory_base, ctrl_click=False, button='left', speed_factor=2):
         if ctrl_click:
             self._press_keys([0x1d])
-        self.click(inventory_base[0] + slot_x * 0.02735,
-                   inventory_base[1] + slot_y * 0.04930555,
-                   inventory_base[0] + slot_x * 0.02735 + 0.005625,
-                   inventory_base[1] + slot_y * 0.04930555 + 0.007777,
+        self.click(inventory_base[0] + slot_x * 0.02735 - 0.006625,
+                   inventory_base[1] + slot_y * 0.04930555 - 0.009777,
+                   inventory_base[0] + slot_x * 0.02735 + 0.006625,
+                   inventory_base[1] + slot_y * 0.04930555 + 0.009777,
                    speed_factor=speed_factor, button=button)
         if ctrl_click:
             self._release_keys([0x1d])
 
     def inventory_copy(self, slot_x, slot_y, inventory_base, speed_factor=1):
-        self.click(inventory_base[0] + slot_x * 0.02735,
-                   inventory_base[1] + slot_y * 0.04930555,
+        self.click(inventory_base[0] + slot_x * 0.02735 - 0.006625,
+                   inventory_base[1] + slot_y * 0.04930555 - 0.009777,
                    inventory_base[0] + slot_x * 0.02735 + 0.005625,
                    inventory_base[1] + slot_y * 0.04930555 + 0.007777,
                    speed_factor=speed_factor, button=None)
@@ -105,6 +106,12 @@ class InputHandler:
 
     def drag(self, x, y, delta=False, speed_factor=1):
         if delta:
-            pyautogui.drag(x, y, self._rnd(min=500 / speed_factor, mean=500 / speed_factor, sigma=50 / speed_factor) / 1000, pyautogui.easeOutQuad, button='left')
+            pyautogui.drag(x, y, self._rnd(min=500 / speed_factor,
+                                           mean=800 / speed_factor,
+                                           sigma=400 / speed_factor) / 1000,
+                           pyautogui.easeOutQuad, button='left')
         else:
-            pyautogui.dragTo(x, y, self._rnd(min=500 / speed_factor, mean=500 / speed_factor, sigma=50 / speed_factor) / 1000, pyautogui.easeOutQuad, button='left')
+            pyautogui.dragTo(x, y, self._rnd(min=500 / speed_factor,
+                                             mean=800 / speed_factor,
+                                             sigma=400 / speed_factor) / 1000,
+                             pyautogui.easeOutQuad, button='left')

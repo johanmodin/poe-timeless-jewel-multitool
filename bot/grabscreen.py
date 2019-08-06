@@ -1,8 +1,6 @@
 # Done by Frannecklp
-
 import numpy as np
 import win32gui, win32ui, win32con, win32api
-from mss import mss
 
 def grab_screen(region=None):
 
@@ -37,7 +35,3 @@ def grab_screen(region=None):
 
 
     return img
-
-
-def grab_screen_fast(region, mss_obj):
-    return mss_obj.grab(region)

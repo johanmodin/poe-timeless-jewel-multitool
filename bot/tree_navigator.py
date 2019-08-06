@@ -1,7 +1,6 @@
 import logging
 import cv2
 import numpy as np
-from PIL import Image
 import pytesseract
 import os
 import time
@@ -59,34 +58,9 @@ SOCKET_MOVE_OFFSET = {
 20: (-500, 500),
 21: (100, -1000)}
 
-
-MOVE_POS2 = {
-1: (-650.565, -226.013),
-2: (648.905, -246.45),
-3: (6.3354, 915.658),
-4: (-1719.9, 2274.17),
-5: (-2470.66, -106.1434),
-6: (-1549.02, -2464.39),
-7: (1695.53, -2377.1),
-8: (2800.84, 81.5361),
-9: (1334.37, 2500.76),
-10: (50.12471, 5195.44),
-11: (-4000.19, 5044.92),
-12: (-5395.86, 2420.42),
-13: (-5586.95, 113.7007),
-14: (-5644.59, -2155.18),
-15: (-3144.14, -5558.87),
-16: (300.10728, -5336.32),
-17: (3522.05, -4687.21), #
-18: (5454.2, -2002.75),
-19: (5465.24, 41.3341),
-20: (5068.94, 2121.07),
-21: (3372.76, 5112.5)}
-
 X_SCALE = 0.2
 Y_SCALE = 0.2
 NODE_TEMPLATE_THRESHOLD = 0.1
-TEXTBOX_MOUSE_OFFSET = [32, 0]
 CIRCLE_EFFECTIVE_RADIUS = 299
 
 IMAGE_FOLDER = 'data/images/'
@@ -97,7 +71,7 @@ TEMPLATES = {'Notable.png': {'size': (30, 30), 'threshold': 0.89},
              'Skill.png': {'size': (21, 21), 'threshold': 0.87},
              'SkillAllocated.png': {'size': (21, 21), 'threshold':  0.93}}
 
-TXT_BOX = {'x': 30, 'y': 0, 'w': 900, 'h': 320}
+TXT_BOX = {'x': 32, 'y': 0, 'w': 900, 'h': 320}
 
 mod_files = {
     "passives":  "data/passives.json",
@@ -107,8 +81,6 @@ mod_files = {
 }
 
 ### TO DO:
-# Fixa så att trädnavigeraren inte har följdfel genom t ex kontrollpunkter
-# och så att den blir robustare mot brus i musrörelsen
 # Fixa _analyze_nodes
 # Fixa så att keystones känns igen
 
@@ -186,17 +158,19 @@ class TreeNavigator:
 
         self.input_handler.click(*move_to, *move_to, button=None, raw=True, speed_factor=1)
         self.input_handler.drag(self.origin_pos[0], self.origin_pos[1], speed_factor = 1)
-        self.input_handler.rnd_sleep(min=100, mean=200, sigma=100)
+        self.input_handler.rnd_sleep(min=200, mean=300, sigma=100)
         self.ingame_pos = [socket_tx + move_offset_tx, socket_ty + move_offset_ty]
 
     def _click_socket(self, socket_pos, insert=True):
         self.log.debug('Clicking socket')
         xy = socket_pos
+        lt = [xy[0] - 7, xy[1] - 7]
+        rb = [xy[0] + 7, xy[1] + 7]
         if insert:
-            self.input_handler.click(*xy, *xy, button='left', raw=True)
+            self.input_handler.click(*lt, *rb, button='left', raw=True)
         else:
-            self.input_handler.click(*xy, *xy, button='right', raw=True)
-        self.input_handler.rnd_sleep(min=100, mean=200)
+            self.input_handler.click(*lt, *rb, button='right', raw=True)
+        self.input_handler.rnd_sleep(min=200, mean=300)
 
     def _tree_pos_to_xy(self, pos, offset=False):
         if offset:
@@ -326,8 +300,10 @@ class TreeNavigator:
 
     def _get_node_data(self, location):
         self.log.debug('Getting node stats at location %s' % location)
-        self.input_handler.click(*location, *location, button=None, raw=True, speed_factor=3)
-        textbox_lt = location + TEXTBOX_MOUSE_OFFSET
+        lt = [location[0] - 7, location[1] - 7]
+        rb = [location[0] + 7, location[1] + 7]
+        self.input_handler.click(*lt, *rb, button=None, raw=True, speed_factor=3)
+        textbox_lt = location + [TXT_BOX['x'], TXT_BOX['y']]
         textbox_rb = textbox_lt + [TXT_BOX['w'], TXT_BOX['h']]
 
         jewel_area_bgr = grab_screen(tuple(np.concatenate([textbox_lt, textbox_rb])))
@@ -338,18 +314,18 @@ class TreeNavigator:
         item_desc = None
         item_name = None
         self.input_handler.click_hotkey('p')
-        self.input_handler.rnd_sleep(min=50, mean=100, sigma=100)
+        self.input_handler.rnd_sleep(min=150, mean=200, sigma=100)
         self.input_handler.click_hotkey('i')
         if copy:
-            self.input_handler.rnd_sleep(min=50, mean=100, sigma=100)
+            self.input_handler.rnd_sleep(min=150, mean=200, sigma=100)
             item = self.input_handler.inventory_copy(*item_location, OWN_INVENTORY_ORIGIN, speed_factor=2)
             item_desc = item.split('\n')[9].strip()
             item_name = item.split('\n')[1].strip()
-        self.input_handler.rnd_sleep(min=50, mean=100, sigma=100)
+        self.input_handler.rnd_sleep(min=150, mean=200, sigma=100)
         self.input_handler.inventory_click(*item_location, OWN_INVENTORY_ORIGIN)
-        self.input_handler.rnd_sleep(min=50, mean=100, sigma=100)
+        self.input_handler.rnd_sleep(min=150, mean=200, sigma=100)
         self.input_handler.click_hotkey('i')
-        self.input_handler.rnd_sleep(min=50, mean=100, sigma=100)
+        self.input_handler.rnd_sleep(min=150, mean=200, sigma=100)
         return item_name, item_desc
 
     def generate_good_strings(self, files):
