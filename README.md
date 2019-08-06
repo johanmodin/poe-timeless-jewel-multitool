@@ -28,3 +28,5 @@ Additionally, the bot may be set up to receive jewels through trade from players
 A (very) simple site for searching through the database of jewels for specific mods is available in the site folder. It is run with `python3 server.py`. 
 
 Currently, the database query only sorts results by text relevance. If a site with this functionality is to be made public, a new database scheme with easier access to summed mod values should be created as this would increase performance and improve search results as the current query only sorts after text relevance, not mod value. 
+
+![alt text](https://github.com/johanahlqvist/poe-timeless-jewel-recorder/blob/master/site_example.png)
