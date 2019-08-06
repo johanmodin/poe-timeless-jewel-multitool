@@ -60,7 +60,6 @@ SOCKET_MOVE_OFFSET = {
 
 X_SCALE = 0.2
 Y_SCALE = 0.2
-NODE_TEMPLATE_THRESHOLD = 0.1
 CIRCLE_EFFECTIVE_RADIUS = 299
 
 IMAGE_FOLDER = 'data/images/'
@@ -100,7 +99,6 @@ class TreeNavigator:
     def eval_jewel(self, item_location):
         self.ingame_pos = [0, 0]
         item_name, item_desc = self._setup(item_location, copy=True)
-        self.log.info('Analyzing %s' % item_desc)
 
         pool = Pool(self.config['ocr_threads'])
         jobs = {}
@@ -109,14 +107,14 @@ class TreeNavigator:
             socket_nodes = self._analyze_nodes(socket_id)
 
             # Convert stats for the socket from image to lines in separate process
+                self.log.info('Performing asynchronous OCR')
             jobs[socket_id] = pool.map_async(OCR.node_to_strings, socket_nodes)
             self.log.info('Analyzed socket %s' % socket_id)
 
         self._setup(item_location)
-        self.log.info('Analyzed %s' % item_desc)
-
+        self.log.info('Waiting for last OCR to finish')
         item_stats = [{'socket_id': socket_id,
-                       'socket_nodes': self._filter_ocr_lines(jobs[socket_id].get(timeout=120))}
+                       'socket_nodes': self._filter_ocr_lines(jobs[socket_id].get(timeout=300))}
                       for socket_id in jobs]
         pool.close()
         pool.join()

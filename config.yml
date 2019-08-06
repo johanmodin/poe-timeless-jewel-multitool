@@ -1,6 +1,7 @@
 bot:
     timeout: 30
     db_url: 'mongodb://localhost:27017/'
+    db_name: 'project_timeless'
     resolution: '2560x1440'
 input_handler:
     key_press_interval: 200
@@ -8,4 +9,4 @@ input_handler:
 trader:
     log_path: 'C:\Program Files (x86)\Grinding Gear Games\Path of Exile\logs\Client.txt'
 tree_nav:
-    ocr_threads: 4
+    ocr_threads: 6

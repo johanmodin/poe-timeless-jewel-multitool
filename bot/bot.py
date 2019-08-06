@@ -4,6 +4,7 @@ from datetime import datetime
 import logging
 import time
 import sys
+import numpy as np
 
 from .trader import Trader
 from .tree_navigator import TreeNavigator
@@ -20,13 +21,14 @@ class Bot:
 
         self.trader = Trader(self.resolution)
         self.input_handler = InputHandler(self.resolution)
-        self.db = MongoClient(self.config['db_url'])['project_timeless_test4']
+        self.db = MongoClient(self.config['db_url'])[self.config['db_name']]
         self.run = True
 
     def loop(self):
         time.sleep(5)
         while self.run:
-            username = 'test'
+            username = 'N/A'
+            # To enable the trading, uncomment rows below
             '''
             empty = self.trader.verify_empty_inventory()
             if not empty:
@@ -38,9 +40,12 @@ class Bot:
             '''
             jewel_locations, descriptions = self.trader.get_jewel_locations()
             self.log.info('Got %s new jewels' % len(jewel_locations))
-            long_break_at_idx = [8, 15, 23, 35, 42, 54]
+            long_break_at_idx = np.random.choice(60, 5)
             for idx, jewel_location in enumerate(jewel_locations):
+                self.log.info('Analyzing jewel (%s/%s) with description: %s'
+                              % (idx, len(jewel_locations), descriptions[idx]))
                 if idx in long_break_at_idx:
+                    self.log.info('Taking a break of around 5 minutes.')
                     self.input_handler.rnd_sleep(mean=300000, sigma=100000, min=120000)
                 stored_equivalents = self.db['jewels'].find({'description': descriptions[idx]})
                 if stored_equivalents.count() > 0:
@@ -58,7 +63,7 @@ class Bot:
 
                 self.store_items(socket_instances)
 
-            sys.exit(0)
+            # To enable the trading, uncomment row below
             #self.trader.return_items(username, jewel_locations)
 
     def store_items(self, socket_instances):
