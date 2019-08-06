@@ -5,3 +5,5 @@ numpy
 pypiwin32
 opencv-contrib-python
 pytesseract
+python-Levenshtein-wheels
+cherrypy
