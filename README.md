@@ -24,6 +24,8 @@ NOTICE: Although this bot does not play the game for you, performing timed actio
 
 Additionally, the bot may be set up to receive jewels through trade from players whispering to it by uncommenting the commented lines in the loop method in bot/bot.py. However, as a single jewel takes roughly 5 minutes to analyze, a full inventory of jewels would have the trader waiting 5 hours for his jewels back. Thus, this feature is not activated by default. Instead, the bot will by default solely analyze the jewels in the character's inventory.
 
+The bot does not store information on how the key stones are transformed.
+
 #### Site
 A (very) simple site for searching through the database of jewels for specific mods is available in the site folder. It is run with `python3 server.py`. 
 
