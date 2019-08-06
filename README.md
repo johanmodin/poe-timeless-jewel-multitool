@@ -20,7 +20,7 @@ NOTICE: Although this bot does not play the game for you, performing timed actio
 1. Make sure the skill tree does not have the ascendancy blob up and is maximally zoomed out.
 2. Stand close to your stash. No inventory or other windows should be open.
 3. Run `python3 run.py` and tab into the game.
-4. The bot will automatically socket the jewel into every socket and record all of the affected nodes.
+4. The bot will automatically socket the jewels in your inventory into every socket and record all of the affected nodes.
 
 Additionally, the bot may be set up to receive jewels through trade from players whispering to it by uncommenting the commented lines in the loop method in bot/bot.py. However, as a single jewel takes roughly 5 minutes to analyze, a full inventory of jewels would have the trader waiting 5 hours for his jewels back. Thus, this feature is not activated by default. Instead, the bot will by default solely analyze the jewels in the character's inventory.
 
