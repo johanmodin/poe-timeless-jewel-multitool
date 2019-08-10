@@ -29,6 +29,6 @@ The bot does not store information on how the key stones are transformed.
 #### Site
 A (very) simple site for searching through the database of jewels for specific mods is available in the site folder. It is run with `python3 server.py`. 
 
-Currently, the database query only sorts results by text relevance. If a site with this functionality is to be made public, a new database scheme with easier access to summed mod values should be created as this would increase performance and improve search results as the current query only sorts after text relevance, not mod value. 
+Currently, the database query only sorts results by text relevance. If a site with this functionality is to be made public, a new database scheme with easier access to summed mod values should be created as this would increase performance and improve search results as the current query only sorts after text relevance, not mod value. Additionally, this would easily allow searching for multiple mods in a sum / weighted sum mode, which again would provide significantly most relevant search results.
 
 ![alt text](https://github.com/johanahlqvist/poe-timeless-jewel-recorder/blob/master/site_example.png)
