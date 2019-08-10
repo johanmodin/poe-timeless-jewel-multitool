@@ -27,7 +27,7 @@ Additionally, the bot may be set up to receive jewels through trade from players
 The bot does not store information on how the key stones are transformed.
 
 #### Site
-A (very) simple site for searching through the database of jewels for specific mods is available in the site folder. It is run with `python3 run_site.py` and heading to [127.0.0.1:8080]. It allows searching for mods by comparing the levenshtein distance to known mods as well as weighting them such that mods with widely different value magnitudes can be summed together in a meaningful way. 
+A (very) simple site for searching through the database of jewels for specific mods is available in the site folder. It is run with `python3 run_site.py` and hosted [locally](127.0.0.1:8080). It allows searching for mods by comparing the levenshtein distance to known mods as well as weighting them such that mods with widely different value magnitudes can be summed together in a meaningful way. 
 
 
 ![alt text](https://github.com/johanahlqvist/poe-timeless-jewel-recorder/blob/master/site_example.png)
