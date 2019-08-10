@@ -60,7 +60,7 @@ SOCKET_MOVE_OFFSET = {
 
 X_SCALE = 0.2
 Y_SCALE = 0.2
-CIRCLE_EFFECTIVE_RADIUS = 305
+CIRCLE_EFFECTIVE_RADIUS = 300
 
 IMAGE_FOLDER = 'data/images/'
 TEMPLATES = {'Notable.png': {'size': (30, 30), 'threshold': 0.89},
@@ -217,14 +217,16 @@ class TreeNavigator:
         socket_offset = self._find_socket(socket_pos)
         self.log.info('Jewel socket offset correction: %s' % socket_offset)
 
-
         socket_pos[0] += socket_offset[0]
         socket_pos[1] += socket_offset[1]
 
-        x1 = int(socket_pos[0] - CIRCLE_EFFECTIVE_RADIUS)
-        y1 = int(socket_pos[1] - CIRCLE_EFFECTIVE_RADIUS)
-        x2 = int(x1 + 2 * CIRCLE_EFFECTIVE_RADIUS)
-        y2 = int(y1 + 2 * CIRCLE_EFFECTIVE_RADIUS)
+        # Add some margin so that we dont accidentally cut any nodes off
+        margin = 32
+
+        x1 = int(socket_pos[0] - CIRCLE_EFFECTIVE_RADIUS - margin)
+        y1 = int(socket_pos[1] - CIRCLE_EFFECTIVE_RADIUS - margin)
+        x2 = int(x1 + 2 * CIRCLE_EFFECTIVE_RADIUS + margin)
+        y2 = int(y1 + 2 * CIRCLE_EFFECTIVE_RADIUS + margin)
 
         nodes = self._get_node_locations_from_screen((x1, y1, x2, y2))
         nodes = self._filter_nodes(nodes, socket_pos)
@@ -267,11 +269,12 @@ class TreeNavigator:
         nodes = nodes[distances_to_socket <= CIRCLE_EFFECTIVE_RADIUS]
         return nodes
 
-    def _get_node_locations_from_screen(self, box):
+    def _get_node_locations_from_screen(self, box, margin=32):
         jewel_area_bgr = grab_screen(box)
         jewel_area_gray = cv2.cvtColor(jewel_area_bgr, cv2.COLOR_BGR2GRAY)
 
-        locations = np.zeros((CIRCLE_EFFECTIVE_RADIUS * 2, CIRCLE_EFFECTIVE_RADIUS * 2))
+        locations = np.zeros((CIRCLE_EFFECTIVE_RADIUS * 2 + 2 * margin,
+                              CIRCLE_EFFECTIVE_RADIUS * 2 + 2 * margin))
 
         for template_name in ['Notable.png', 'NotableAllocated.png', 'Skill.png', 'SkillAllocated.png']:
             centered_coordinates = self._match_image(jewel_area_gray, template_name)
