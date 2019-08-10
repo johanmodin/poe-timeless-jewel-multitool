@@ -24,3 +24,4 @@ tree_nav:
 mod_search_site:
     db_url: 'mongodb://localhost:27017/'
     db_name: 'project_timeless'
+    jewels_per_search: 20

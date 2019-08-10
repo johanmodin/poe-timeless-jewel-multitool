@@ -4,7 +4,6 @@ function append_to_dom(data) {
     $("#jewel_list").empty();
     $("#jewel_list").attr("modified", Date.now());
     var data = JSON.parse(data)
-    console.log(data)
     if (data.length == 0) {
         return
     }
@@ -24,7 +23,7 @@ function append_to_dom(data) {
                 var node_block = "<div class = node_box>";
                 var collapse_div_id = "collapse_" + node.location[0] + node.location[1];
 
-                node_block += "<b><a data-toggle=collapse data-target=#" + collapse_div_id + ">";
+                node_block += "<b><a " + collapse_div_id + ">";
                 node_block += node.name[0] + "</a></b>";
                 node_block += "<div id=" + collapse_div_id + " class=collapse>"
                 node_block += node.mods.map(function (mod) {
@@ -43,25 +42,26 @@ function append_to_dom(data) {
         block += '</div></div></div>';
         return block;
     }).join('');
-    console.log(blocks);
     $("#jewel_list").append(blocks).hide().fadeIn();
     $("#jewel_list").attr("modified", Date.now());
 }
 
 function search() {
   var form_struct = $("form#modForm input[type=text]");
-  var search_terms = [];
+  var search_terms = {};
   for (var i=0; i < form_struct.length; i++){
     var term = form_struct[i].value;
+    var modID = form_struct[i].id.substring(3, form_struct[i].id.length);
+
     if (term.length > 0) {
-      search_terms.push(term);
+      search_terms[term] = document.getElementById('weight' + modID).value;
     }
   }
-  console.log(search_terms);
+
     $.ajax({
         url: "search",
         data: {
-            "search_terms": search_terms
+            "search_terms": JSON.stringify(search_terms)
         }
     }).done(function (data) {
         append_to_dom(data);
@@ -73,7 +73,8 @@ var counter = 0;
 function addInput(divName){
           var newdiv = document.createElement('div');
           newdiv.id = counter;
-          newdiv.innerHTML = "<input type='text' placeholder='Enter mod..'><span onClick=removeInput(" + counter + ")>&#9746;</span>";
+          newdiv.innerHTML = "<input id='weight" + counter + "'value='1' title='Weight' style='width: 70px' type='number'>\n";
+          newdiv.innerHTML += "<input id='mod" + counter + "' type='text' placeholder='Enter mod..' style='width: 435px'><span onClick=removeInput(" + counter + ")>&#9746;</span>";
           document.getElementById(divName).appendChild(newdiv);
           counter++;
 }

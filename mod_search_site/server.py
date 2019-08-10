@@ -14,7 +14,7 @@ from os import path, curdir
 from .utils import get_config
 
 FILTERED_PASSIVE_LIST = 'data/filt_nonfilt_passives.json'
-JEWELS_PER_SEARCH = 10
+
 
 class ModSearch(object):
     def __init__(self):
@@ -38,24 +38,23 @@ class ModSearch(object):
         return open('mod_search_site/index.html')
 
     @cherrypy.expose
-    def search(self, **search_terms):
+    def search(self, search_terms):
+        search_terms = json.loads(search_terms)
         coll = self.db["jewels"]
-        if isinstance(search_terms['search_terms[]'], str):
-            search_terms['search_terms[]'] = [search_terms['search_terms[]']]
-        searched_mods = search_terms['search_terms[]']
-        filtered_mods = [self._filter_mod(mod) for mod in searched_mods]
-        candidate_mods = self._get_candidates(filtered_mods)
+        filtered_mod_data = [self._filter_mod(mod_data) for mod_data in search_terms.items()]
+        candidate_mod_data = self._get_candidates(filtered_mod_data)
 
-        query_mods = ['$summed_mods.%s' % mod[0] for mod in candidate_mods]
+        query_mods = [{'$multiply': ['$summed_mods.%s' % data[0], float(data[2])]} for data in candidate_mod_data]
         projection = {'name': 1, 'description': 1, 'reported': 1, 'created': 1,
                       'socket_id': 1, 'socket_nodes': 1, 'socket_nodes': 1,
                       "sum": {"$sum": query_mods}}
         searched_mod_projection = {'searched_mods': {mod[1]: '$summed_mods.%s' % mod[0]
-                                                     for mod in candidate_mods}}
+                                                     for mod in candidate_mod_data}}
         projection.update(searched_mod_projection)
+
         jewel_socket_instances = self.db['jewels'].aggregate(
             [{"$project": projection},
-            {"$sort": {"sum":-1}}, {"$limit": JEWELS_PER_SEARCH}]
+            {"$sort": {"sum":-1}}, {"$limit": self.config['jewels_per_search']}]
         )
 
         docs_to_return = []
@@ -71,22 +70,22 @@ class ModSearch(object):
         return [dumps(docs_to_return)]
 
     def _filter_mod(self, term):
-        filt_mod = re.sub(self.nonalpha_re, '', term).lower()
-        return filt_mod
+        filt_mod = re.sub(self.nonalpha_re, '', term[0]).lower()
+        return (filt_mod, term[1])
 
-    def _get_candidates(self, mods):
-
+    def _get_candidates(self, mods_data):
         candidates = []
 
-        for mod in mods:
+        for mod_data in mods_data:
+            mod_name, mod_weight = mod_data
             best_match = None
             best_distance = 99999999999
             for stored_mod in self.all_mods.keys():
-                d = distance(mod, stored_mod)
+                d = distance(mod_name, stored_mod)
                 if d < best_distance:
                     best_distance = d
                     best_match = stored_mod
-            candidates.append((best_match, self.all_mods[best_match]))
+            candidates.append((best_match, self.all_mods[best_match], mod_weight))
 
         return candidates
 
