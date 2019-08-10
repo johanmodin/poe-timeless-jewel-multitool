@@ -44,8 +44,6 @@ class Bot:
             continue
         '''
         jewel_locations, descriptions = self.trader.get_jewel_locations()
-        if len(jewel_locations) == 0:
-            break
         self.log.info('Got %s new jewels' % len(jewel_locations))
         long_break_at_idx = np.random.choice(60, self.config['breaks_per_full_inventory'])
         for idx, jewel_location in enumerate(jewel_locations):
@@ -56,8 +54,8 @@ class Bot:
                 self.input_handler.rnd_sleep(mean=300000, sigma=100000, min=120000)
             stored_equivalents = self.db['jewels'].find({'description': descriptions[idx]})
             if stored_equivalents.count() > 0:
-                self.log.info('Jewel with descriptions %s is \
-                               already analyzed, skipping!' % descriptions[idx])
+                self.log.info('Jewel with descriptions %s is already analyzed, skipping!'
+                               % descriptions[idx])
                 continue
             self.tree_nav = TreeNavigator(self.resolution)
             analysis_time = datetime.utcnow()
