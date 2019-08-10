@@ -5,11 +5,14 @@ import logging
 import time
 import sys
 import numpy as np
+import re
 
 from .trader import Trader
 from .tree_navigator import TreeNavigator
 from .utils import get_config
 from .input_handler import InputHandler
+
+
 
 
 class Bot:
@@ -18,6 +21,7 @@ class Bot:
         self.log = logging.getLogger('bot')
         self.config = get_config('bot')
         self.resolution = self.split_res(self.config['resolution'])
+        self.nonalpha_re = re.compile('[^a-zA-Z]')
 
         self.trader = Trader(self.resolution)
         self.input_handler = InputHandler(self.resolution)
@@ -40,7 +44,7 @@ class Bot:
             '''
             jewel_locations, descriptions = self.trader.get_jewel_locations()
             self.log.info('Got %s new jewels' % len(jewel_locations))
-            long_break_at_idx = np.random.choice(60, 5)
+            long_break_at_idx = np.random.choice(60, self.config['breaks_per_full_inventory'])
             for idx, jewel_location in enumerate(jewel_locations):
                 self.log.info('Analyzing jewel (%s/%s) with description: %s'
                               % (idx, len(jewel_locations), descriptions[idx]))
@@ -49,12 +53,14 @@ class Bot:
                     self.input_handler.rnd_sleep(mean=300000, sigma=100000, min=120000)
                 stored_equivalents = self.db['jewels'].find({'description': descriptions[idx]})
                 if stored_equivalents.count() > 0:
-                    self.log.info('Jewel with descriptions %s is already analyzed, skipping!' % descriptions[idx])
+                    self.log.info('Jewel with descriptions %s is \
+                                   already analyzed, skipping!' % descriptions[idx])
                     continue
                 self.tree_nav = TreeNavigator(self.resolution)
                 analysis_time = datetime.utcnow()
                 name, description, socket_instances = self.tree_nav.eval_jewel(jewel_location)
-                self.log.info('Jewel evaluation took %s seconds' % (datetime.utcnow() - analysis_time).seconds)
+                self.log.info('Jewel evaluation took %s seconds' %
+                               (datetime.utcnow() - analysis_time).seconds)
                 for socket in socket_instances:
                     socket['description'] = description
                     socket['name'] = name
@@ -73,17 +79,17 @@ class Bot:
             for node in jewel_inst['socket_nodes']:
                 for mod in node['mods']:
                     filt_mod, value = self._filter_mod(mod)
-                    if filt_mod in jewel_inst['filtered_stats']:
-                        jewel_inst['filtered_stats'][filt_mod] += value
+                    if filt_mod in jewel_inst['summed_mods']:
+                        jewel_inst['summed_mods'][filt_mod] += value
                     else:
-                        jewel_inst['filtered_stats'][filt_mod] = value
+                        jewel_inst['summed_mods'][filt_mod] = value
 
         result = self.db['jewels'].insert_many(socket_instances)
         return result
 
-    def _filter_mod(s):
+    def _filter_mod(self, s):
         value = 1
-        filt_mod = re.sub(nonalpha_re, '', s).lower()
+        filt_mod = re.sub(self.nonalpha_re, '', s).lower()
         potential_value = re.findall('\d+|$', s)[0]
         if len(potential_value) > 0:
             value = float(potential_value)
