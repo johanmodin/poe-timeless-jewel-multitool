@@ -1,12 +1,25 @@
 bot:
-    timeout: 30
     db_url: 'mongodb://localhost:27017/'
     db_name: 'project_timeless'
+    # Note that changing the resolution is bound to cause issues as some calls to click
+    # is made with raw=True, thus pointing to the real location rather
+    # than the normalized location
+    # To run another resolution, fix the raw=True calls to click and
+    # the SOCKETS and SOCKET_MOVE_OFFSET dicts' values in tree_navigator
+    # as well as X_SCALE and Y_SCALE which controls the ratio of
+    # between the game's reported position for each socket and the
+    # position converted to pixel values. In addition, a different aspect ratio
+    # might lead to a whole swathe of other problems due to changes
+    # in the relative position of in game objects
     resolution: '2560x1440'
 input_handler:
-    key_press_interval: 200
-    mouse_click_interval: 200
+    key_press_interval: 200 # millseconds
+    mouse_click_interval: 200 # millseconds
 trader:
     log_path: 'C:\Program Files (x86)\Grinding Gear Games\Path of Exile\logs\Client.txt'
 tree_nav:
-    ocr_threads: 6
+    ocr_threads: 6 # How many CPU threads to use for the OCR
+    node_search_speed_factor: 3 # Divides the sleep timer of node search. Higher = faster.
+mod_search_site:
+    db_url: 'mongodb://localhost:27017/'
+    db_name: 'project_timeless'

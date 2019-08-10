@@ -99,8 +99,13 @@
             <div class="eleven columns">
                 <h1>Timeless Jewel Search</h1>
 								<div class="topnav">
-								  <input type="text" id="kw_input" placeholder="Jewel keywords..">
-									<button onclick="search()" type="submit">Search</button>
+									<form method="POST" id="modForm">
+										 <div id="dynamicInput">
+											<input type="text" placeholder='Enter mod..'>
+										 </div>
+										 <input type="button" value="Add mod" onClick="addInput('dynamicInput');">
+										 <button onclick="search()" type="button">Search</button>
+									</form>
 								</div>
             </div>
         </div>

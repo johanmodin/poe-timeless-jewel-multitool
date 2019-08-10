@@ -63,12 +63,31 @@ class Bot:
 
                 self.store_items(socket_instances)
 
-            # To enable the trading, uncomment row below
+            # To enable the returning of items to sender, uncomment row below
             #self.trader.return_items(username, jewel_locations)
 
     def store_items(self, socket_instances):
+        # Add some filtered summed values for easier querying
+        for jewel_inst in socket_instances:
+            jewel_inst['summed_mods'] = {}
+            for node in jewel_inst['socket_nodes']:
+                for mod in node['mods']:
+                    filt_mod, value = self._filter_mod(mod)
+                    if filt_mod in jewel_inst['filtered_stats']:
+                        jewel_inst['filtered_stats'][filt_mod] += value
+                    else:
+                        jewel_inst['filtered_stats'][filt_mod] = value
+
         result = self.db['jewels'].insert_many(socket_instances)
         return result
+
+    def _filter_mod(s):
+        value = 1
+        filt_mod = re.sub(nonalpha_re, '', s).lower()
+        potential_value = re.findall('\d+|$', s)[0]
+        if len(potential_value) > 0:
+            value = float(potential_value)
+        return filt_mod, value
 
     def split_res(self, resolution):
         resolution = [int(n) for n in resolution.split('x')]

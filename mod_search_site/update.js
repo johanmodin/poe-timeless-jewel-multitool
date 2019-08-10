@@ -1,4 +1,3 @@
-// realtime.js
 "use strict";
 
 function append_to_dom(data) {
@@ -14,8 +13,10 @@ function append_to_dom(data) {
         block += "<div class='row'><div><span><h5>" + jewel.name + "</h5></span></a></div>";
         block += "<div class='row'><div><span><h5>" + jewel.description + "</h5></span></a></div>";
         const socket_id = jewel.socket_id;
-        block += "<div class=focus_mod>" + jewel.focused_mod + "</div>";
-        block += "<p>Socketed at " + socket_id + " where it scored " + Number((jewel.score).toFixed(1)) + "</p>";
+        block += jewel.searched_mods.map(function (searched_mod) {
+                    return "<div class=focus_mod>" + searched_mod + "</div>";
+                  }).join('');
+        block += "<p>Socketed at " + socket_id + " with a mod sum of " + jewel.sum + "</p>";
         block +=  "<div><small>";
         block += jewel.socket_nodes.sort(function(n1, n2){
             return (n1.name[0] < n2.name[0] ) ? -1 : (n1.name[0] > n2.name[0] ) ? 1 : 0;}).map(
@@ -42,17 +43,42 @@ function append_to_dom(data) {
         block += '</div></div></div>';
         return block;
     }).join('');
+    console.log(blocks);
     $("#jewel_list").append(blocks).hide().fadeIn();
     $("#jewel_list").attr("modified", Date.now());
 }
 
 function search() {
+  var form_struct = $("form#modForm input[type=text]");
+  var search_terms = [];
+  for (var i=0; i < form_struct.length; i++){
+    var term = form_struct[i].value;
+    if (term.length > 0) {
+      search_terms.push(term);
+    }
+  }
+  console.log(search_terms);
     $.ajax({
         url: "search",
         data: {
-            "search_term": document.getElementById("kw_input").value
+            "search_terms": search_terms
         }
     }).done(function (data) {
         append_to_dom(data);
-    })
+    });
+}
+
+
+var counter = 0;
+function addInput(divName){
+          var newdiv = document.createElement('div');
+          newdiv.id = counter;
+          newdiv.innerHTML = "<input type='text' placeholder='Enter mod..'><span onClick=removeInput(" + counter + ")>&#9746;</span>";
+          document.getElementById(divName).appendChild(newdiv);
+          counter++;
+}
+
+function removeInput(childName){
+  var elem = document.getElementById(childName);
+  elem.parentNode.removeChild(elem);
 }

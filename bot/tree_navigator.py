@@ -107,7 +107,7 @@ class TreeNavigator:
             socket_nodes = self._analyze_nodes(socket_id)
 
             # Convert stats for the socket from image to lines in separate process
-                self.log.info('Performing asynchronous OCR')
+            self.log.info('Performing asynchronous OCR')
             jobs[socket_id] = pool.map_async(OCR.node_to_strings, socket_nodes)
             self.log.info('Analyzed socket %s' % socket_id)
 
@@ -183,7 +183,6 @@ class TreeNavigator:
         tree_pos = [self.ingame_pos[0] + offset[0] / X_SCALE,
                     self.ingame_pos[1] + offset[1] / Y_SCALE]
         return tree_pos
-
 
     def _analyze_nodes(self, socket_id):
         self.log.info('Analyzing nodes for socket id %s' % socket_id)
@@ -300,7 +299,8 @@ class TreeNavigator:
         self.log.debug('Getting node stats at location %s' % location)
         lt = [location[0] - 7, location[1] - 7]
         rb = [location[0] + 7, location[1] + 7]
-        self.input_handler.click(*lt, *rb, button=None, raw=True, speed_factor=3)
+        self.input_handler.click(*lt, *rb, button=None, raw=True,
+                                 speed_factor=self.config['node_search_speed_factor'])
         textbox_lt = location + [TXT_BOX['x'], TXT_BOX['y']]
         textbox_rb = textbox_lt + [TXT_BOX['w'], TXT_BOX['h']]
 
