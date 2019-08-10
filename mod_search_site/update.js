@@ -58,6 +58,10 @@ function search() {
     }
   }
 
+  if (Object.keys(search_terms).length == 0){
+    return;
+  };
+
     $.ajax({
         url: "search",
         data: {

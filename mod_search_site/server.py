@@ -32,6 +32,8 @@ class ModSearch(object):
         self.find_mod_value_re = re.compile('[\-\d+\))|(\d+)]+')
         self.all_mods = json.load(open(FILTERED_PASSIVE_LIST, 'r'))
 
+        cherrypy.server.socket_host = '0.0.0.0'
+
 
     @cherrypy.expose
     def index(self):
