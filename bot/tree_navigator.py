@@ -60,7 +60,7 @@ SOCKET_MOVE_OFFSET = {
 
 X_SCALE = 0.2
 Y_SCALE = 0.2
-CIRCLE_EFFECTIVE_RADIUS = 299
+CIRCLE_EFFECTIVE_RADIUS = 305
 
 IMAGE_FOLDER = 'data/images/'
 TEMPLATES = {'Notable.png': {'size': (30, 30), 'threshold': 0.89},
