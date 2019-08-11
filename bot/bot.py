@@ -10,7 +10,7 @@ import re
 
 from .trader import Trader
 from .tree_navigator import TreeNavigator
-from .utils import get_config
+from .utils import get_config, filter_mod
 from .input_handler import InputHandler
 
 
@@ -55,16 +55,18 @@ class Bot:
             if idx in long_break_at_idx:
                 self.log.info('Taking a break of around 5 minutes.')
                 self.input_handler.rnd_sleep(mean=300000, sigma=100000, min=120000)
+
             stored_equivalents = self.db['jewels'].find({'description': descriptions[idx]})
             if stored_equivalents.count() > 0:
                 self.log.info('Jewel with descriptions %s is already analyzed, skipping!'
                                % descriptions[idx])
                 continue
+
             self.tree_nav = TreeNavigator(self.resolution)
             analysis_time = datetime.utcnow()
             name, description, socket_instances = self.tree_nav.eval_jewel(jewel_location)
-            self.log.info('Jewel evaluation took %s seconds' %
-                           (datetime.utcnow() - analysis_time).seconds)
+
+
             for socket in socket_instances:
                 socket['description'] = description
                 socket['name'] = name
@@ -72,7 +74,9 @@ class Bot:
                 socket['reporter'] = username
 
             self.store_items(socket_instances)
-
+            
+            self.log.info('Jewel evaluation took %s seconds' %
+                           (datetime.utcnow() - analysis_time).seconds)
             # To enable the returning of items to sender, uncomment row below
             '''
             self.trader.return_items(username, jewel_locations)
@@ -84,7 +88,7 @@ class Bot:
             jewel_inst['summed_mods'] = {}
             for node in jewel_inst['socket_nodes']:
                 for mod in node['mods']:
-                    filt_mod, value = self._filter_mod(mod)
+                    filt_mod, value = filter_mod(mod, regex=self.nonalpha_re)
                     if filt_mod in jewel_inst['summed_mods']:
                         jewel_inst['summed_mods'][filt_mod] += value
                     else:
@@ -93,13 +97,6 @@ class Bot:
         result = self.db['jewels'].insert_many(socket_instances)
         return result
 
-    def _filter_mod(self, s):
-        value = 1
-        filt_mod = re.sub(self.nonalpha_re, '', s).lower()
-        potential_value = re.findall('\d+|$', s)[0]
-        if len(potential_value) > 0:
-            value = float(potential_value)
-        return filt_mod, value
 
     def split_res(self, resolution):
         resolution = [int(n) for n in resolution.split('x')]

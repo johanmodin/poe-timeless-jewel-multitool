@@ -4,12 +4,15 @@ import numpy as np
 import pytesseract
 import os
 import time
-from multiprocessing import Pool
 import json
+import re
+
+from multiprocessing import Pool
+from Levenshtein import distance
 
 from .input_handler import InputHandler
 from .grabscreen import grab_screen
-from .utils import get_config
+from .utils import get_config, filter_mod
 
 OWN_INVENTORY_ORIGIN = (0.6769531, 0.567361)
 SOCKETS = {
@@ -90,11 +93,14 @@ class TreeNavigator:
         logging.basicConfig(level=logging.INFO)
         self.log = logging.getLogger('tree_nav')
         self.config = get_config('tree_nav')
+        self.find_mod_value_re = re.compile('[\-\d+\))|(\d+)]+')
+        self.nonalpha_re = re.compile('[^a-zA-Z]')
         self.origin_pos = (self.resolution[0] / 2, self.resolution[1] / 2)
         self.ingame_pos = [0, 0]
         self.templates_and_masks = self.load_templates()
         self.passive_mods, self.passive_names = self.generate_good_strings(mod_files)
-        self.accepted_node_strings = self.passive_mods.union(self.passive_names)
+        self.passive_nodes = list(self.passive_mods.keys()) + list(self.passive_names.keys())
+
 
     def eval_jewel(self, item_location):
         self.ingame_pos = [0, 0]
@@ -197,17 +203,43 @@ class TreeNavigator:
         self._click_socket(socket_pos, insert=False)
         return nodes
 
-    def _filter_ocr_lines(self, nodes_lines):
+    def _filter_ocr_lines(self, nodes_lines, max_dist=4):
         filtered_nodes = []
         for node in nodes_lines:
-            filtered_stats = [l for l in node['stats'] if
-                              self._filter_nonalpha(l) in self.accepted_node_strings]
-            name = [l for l in filtered_stats if
-                    self._filter_nonalpha(l) in self.passive_names]
-            mods = [l for l in filtered_stats if
-                    self._filter_nonalpha(l) in self.passive_mods]
+            names = []
+            mods = []
+            for line in node['stats']:
+                filtered_line = self._filter_nonalpha(line)
+                if len(filtered_line) < 4 or filtered_line == 'Unallocated':
+                    continue
+                if filtered_line in self.passive_names:
+                    names.append(self.passive_names[filtered_line])
+                elif filtered_line in self.passive_mods:
+                    filtered_mod, value = filter_mod(line, regex=self.nonalpha_re)
+                    new_mod = re.sub(self.find_mod_value_re, str(value), self.passive_mods[filtered_line])
+                    mods.append(new_mod)
+                else:
+                    # Sometimes the OCR might return strange results. If so,
+                    # as a last resort, check levenshtein distance to closest
+                    # node. This shouldn't happen often.
+                    best_distance = 99999999999
+                    best_match = None
+                    for possible_mod in self.passive_nodes:
+                        d = distance(filtered_line, possible_mod)
+                        if d < best_distance:
+                            best_distance = d
+                            best_match = possible_mod
+                    if best_distance > max_dist:
+                        continue
+                    if best_match in self.passive_names:
+                        names.append(self.passive_names[best_match])
+                    elif best_match in self.passive_mods:
+                        filtered_mod, value = filter_mod(line, regex=self.nonalpha_re)
+                        new_mod = re.sub(self.find_mod_value_re, str(value), self.passive_mods[best_match])
+                        mods.append(new_mod)
+
             filtered_nodes.append({'location': node['location'],
-                                   'name': name,
+                                   'name': names,
                                    'mods': mods})
         return filtered_nodes
 
@@ -330,26 +362,26 @@ class TreeNavigator:
         return item_name, item_desc
 
     def generate_good_strings(self, files):
-        mods = set()
-        names = set()
+        mods = {}
+        names = {}
         for name in files:
             path = files[name]
             with open(path) as f:
                 data = json.load(f)
                 if isinstance(data, dict):
-                    names.update([self._filter_nonalpha(k) for k in data.keys()])
+                    names.update({self._filter_nonalpha(k): k for k in data.keys()})
                     for key in data.keys():
                         if isinstance(data[key]['passives'][0], list):
-                            mods.update([self._filter_nonalpha(e) for e in data[key]['passives'][0]])
+                            mods.update({self._filter_nonalpha(e): e for e in data[key]['passives'][0]})
                         else:
-                            mods.update([self._filter_nonalpha(e) for e in data[key]['passives']])
+                            mods.update({self._filter_nonalpha(e): e for e in data[key]['passives']})
                 else:
-                    mods.update([self._filter_nonalpha(e) for e in data])
-        mods.remove('')
+                    mods.update({self._filter_nonalpha(e): e for e in data})
+        mods.pop('', None)
         return mods, names
 
     def _filter_nonalpha(self, value):
-        return ''.join(list(filter(lambda x: x.isalpha(), value)))
+        return re.sub(self.nonalpha_re, '', value)
 
 # Adapted from https://github.com/klayveR/python-poe-timeless-jewel
 class OCR:
