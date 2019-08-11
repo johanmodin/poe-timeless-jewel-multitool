@@ -7,6 +7,11 @@ A single jewel analysis consisting of analyzing 21 socket instances, around 1500
 
 NOTICE: Although this bot does not play the game for you, performing timed actions and automated mouse movements violates Path of Exile's terms and is bannable.
 
+### Requirements
+- Python 3.x (tested with 3.7)
+- Tesseract
+- MongoDB
+
 
 ### Setup
 1. `pip install -r requirements.txt`
