@@ -3,6 +3,9 @@ A Path of Exile bot and basic site which allows the highly random timeless jewel
 
 [![Tool Demonstration](https://img.youtube.com/vi/5PHUHtf39yA/0.jpg)](https://www.youtube.com/watch?v=5PHUHtf39yA)
 
+  *A quick video demonstration of the basic features.*
+
+
 A single jewel analysis consisting of analyzing 21 socket instances, around 1500 nodes and many thousands of mods takes around 240 seconds, though this will vary depending on how many cores you can spare for the OCR (measured with 6 cores).
 
 NOTICE: Although this bot does not play the game for you, performing timed actions and automated mouse movements violates Path of Exile's terms and is bannable.
