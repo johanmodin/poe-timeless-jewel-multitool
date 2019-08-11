@@ -42,6 +42,7 @@ class ModSearch(object):
     @cherrypy.expose
     def search(self, search_terms):
         search_terms = json.loads(search_terms)
+        print(search_terms)
         coll = self.db["jewels"]
         filtered_mod_data = [self._filter_mod(mod_data) for mod_data in search_terms.items()]
         candidate_mod_data = self._get_candidates(filtered_mod_data)

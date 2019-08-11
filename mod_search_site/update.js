@@ -48,6 +48,7 @@ function append_to_dom(data) {
 
 function search() {
   var form_struct = $("form#modForm input[type=text]");
+  console.log(form_struct);
   var search_terms = {};
   for (var i=0; i < form_struct.length; i++){
     var term = form_struct[i].value;
@@ -73,7 +74,7 @@ function search() {
 }
 
 
-var counter = 0;
+var counter = 1;
 function addInput(divName){
           var newdiv = document.createElement('div');
           newdiv.id = counter;

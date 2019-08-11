@@ -221,12 +221,12 @@ class TreeNavigator:
         socket_pos[1] += socket_offset[1]
 
         # Add some margin so that we dont accidentally cut any nodes off
-        margin = 32
+        margin = 20
 
         x1 = int(socket_pos[0] - CIRCLE_EFFECTIVE_RADIUS - margin)
         y1 = int(socket_pos[1] - CIRCLE_EFFECTIVE_RADIUS - margin)
-        x2 = int(x1 + 2 * CIRCLE_EFFECTIVE_RADIUS + margin)
-        y2 = int(y1 + 2 * CIRCLE_EFFECTIVE_RADIUS + margin)
+        x2 = int(x1 + 2 * CIRCLE_EFFECTIVE_RADIUS + 2 * margin)
+        y2 = int(y1 + 2 * CIRCLE_EFFECTIVE_RADIUS + 2 * margin)
 
         nodes = self._get_node_locations_from_screen((x1, y1, x2, y2))
         nodes = self._filter_nodes(nodes, socket_pos)
@@ -273,8 +273,8 @@ class TreeNavigator:
         jewel_area_bgr = grab_screen(box)
         jewel_area_gray = cv2.cvtColor(jewel_area_bgr, cv2.COLOR_BGR2GRAY)
 
-        locations = np.zeros((CIRCLE_EFFECTIVE_RADIUS * 2 + 2 * margin,
-                              CIRCLE_EFFECTIVE_RADIUS * 2 + 2 * margin))
+        locations = np.zeros((box[2] - box[0],
+                              box[3] - box[1]))
 
         for template_name in ['Notable.png', 'NotableAllocated.png', 'Skill.png', 'SkillAllocated.png']:
             centered_coordinates = self._match_image(jewel_area_gray, template_name)
