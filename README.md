@@ -11,7 +11,7 @@ NOTICE: Although this bot does not play the game for you, performing timed actio
 - Python 3.x (tested with 3.7)
 - Tesseract
 - MongoDB
-
+- Python packages as specified by `requirements.txt`
 
 ### Setup
 1. `pip install -r requirements.txt`
