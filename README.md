@@ -14,6 +14,7 @@ NOTICE: Although this bot does not play the game for you, performing timed actio
 - Python packages as specified by `requirements.txt`
 
 ### Setup
+(0. If you're new to Python on Windows, I recommend [downloading Anaconda](https://www.anaconda.com/distribution/#download-section) and [setting up a virtual environment](https://uoa-eresearch.github.io/eresearch-cookbook/recipe/2014/11/20/conda/))
 1. `pip install -r requirements.txt`
 2. Install tesseract [as per the instructions](https://github.com/UB-Mannheim/tesseract/wiki)
 3. Move the tesseract poe tesseract config file located in data/tesseract to the tesseract config folder (courtesy of klayveR)
