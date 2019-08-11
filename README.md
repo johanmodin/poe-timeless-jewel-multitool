@@ -1,7 +1,9 @@
 # poe-timeless-jewel-multitool
 A Path of Exile bot and basic site which allows the highly random timeless jewels to be searchable and presentable. It goes through all of the sockets and performs OCR on every socket node, after which it stores the data on all sockets' nodes in a Mongo database along with their random seed and other metadata to enable searching through the thousands of possible jewel-socket instances for just the stats you're looking for.
 
-A single jewel analysis consisting of analyzing 21 socket instances, around 1500 nodes and many thousands of mods takes around 240 seconds.
+[![Tool Demonstration](https://img.youtube.com/vi/5PHUHtf39yA/0.jpg)](https://www.youtube.com/watch?v=5PHUHtf39yA)
+
+A single jewel analysis consisting of analyzing 21 socket instances, around 1500 nodes and many thousands of mods takes around 240 seconds, though this will vary depending on how many cores you can spare for the OCR (measured with 6 cores).
 
 NOTICE: Although this bot does not play the game for you, performing timed actions and automated mouse movements violates Path of Exile's terms and is bannable.
 
@@ -18,9 +20,10 @@ NOTICE: Although this bot does not play the game for you, performing timed actio
 #### Bot
 (0. Have a character with all of the tree's sockets allocated)
 1. Make sure the skill tree does not have the ascendancy blob up and is maximally zoomed out.
-2. Stand close to your stash. No inventory or other windows should be open.
-3. Run `python3 run.py` and tab into the game.
-4. The bot will automatically socket the jewels in your inventory into every socket and record all of the affected nodes.
+2. Fill your inventory with jewels you want to search. 
+3. Close all ingame windows. No inventory or other windows should be open.
+4. Run `python3 run.py` and tab into the game.
+5. The bot will automatically socket the jewels in your inventory into every socket and record all of the affected nodes.
 
 Additionally, the bot may be set up to receive jewels through trade from players whispering to it by uncommenting the commented lines in the loop method in bot/bot.py. However, as a single jewel takes roughly 5 minutes to analyze, a full inventory of jewels would have the trader waiting 5 hours for his jewels back. Thus, this feature is not activated by default. Instead, the bot will by default solely analyze the jewels in the character's inventory.
 
