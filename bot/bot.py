@@ -1,5 +1,6 @@
 from queue import Queue
 from pymongo import MongoClient
+from bson.objectid import ObjectId
 from datetime import datetime
 import logging
 import time
@@ -29,7 +30,9 @@ class Bot:
         self.run = True
 
     def loop(self):
-        time.sleep(5)
+        self.log.info('Bot starts in %s seconds. Please tab into the game client.'
+                       % self.config['initial_sleep'])
+        time.sleep(int(self.config['initial_sleep']))
         # If you're running the trade functionality, put a while loop
         # here and indent all code beneath it in the function
         username = 'N/A'
