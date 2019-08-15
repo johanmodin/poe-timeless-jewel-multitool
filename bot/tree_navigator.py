@@ -290,7 +290,7 @@ class TreeNavigator:
 
         for template_name in ['Jewel.png', 'JewelSocketed.png']:
             centered_coordinates = self._match_image(socket_area, template_name)
-            locations[centered_coordinates] = 1
+            locations[tuple(centered_coordinates)] = 1
 
         rel_node_pos_yx = np.argwhere(locations == 1)
         rel_node_pos = rel_node_pos_yx.T[::-1].T
@@ -326,7 +326,7 @@ class TreeNavigator:
 
         for template_name in ['Notable.png', 'NotableAllocated.png', 'Skill.png', 'SkillAllocated.png']:
             centered_coordinates = self._match_image(jewel_area_gray, template_name)
-            locations[centered_coordinates] = 1
+            locations[tuple(centered_coordinates)] = 1
 
         rel_node_pos_yx = np.argwhere(locations == 1)
         rel_node_pos = rel_node_pos_yx.T[::-1].T

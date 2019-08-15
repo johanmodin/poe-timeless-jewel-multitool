@@ -5,7 +5,7 @@ import re
 
 def get_config(module_name):
     config_path = os.path.abspath('config.yml')
-    config = yaml.load(open(config_path, 'r'))
+    config = yaml.safe_load(open(config_path, 'r'))
     return config[module_name]
 
 def filter_mod(m, regex):
