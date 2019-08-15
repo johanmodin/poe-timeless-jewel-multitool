@@ -22,7 +22,7 @@ NOTICE: Although this bot does not play the game for you, performing timed actio
 2. Install tesseract [as per the instructions](https://github.com/UB-Mannheim/tesseract/wiki)
 3. Move the tesseract poe tesseract config file located in data/tesseract to the tesseract config folder (courtesy of klayveR)
 4. Install and start a [MongoDB server](https://www.mongodb.com/download-center/community)
-5. Check out the config.yml file for configuration. The bot is only tested for working with the 2560x1440 resolution.
+5. Check out the config.yml file for configuration. The bot will currently only work for the 2560x1440 and 1920x1080 resolutions. 
 
 
 ### Usage
