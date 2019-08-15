@@ -18,7 +18,8 @@ from .input_handler import InputHandler
 
 class Bot:
     def __init__(self):
-        logging.basicConfig(level=logging.INFO)
+        logging.basicConfig(level=logging.INFO,
+            format='%(asctime)s %(message)s', datefmt='[%H:%M:%S %d-%m-%Y]')
         self.log = logging.getLogger('bot')
         self.config = get_config('bot')
         self.resolution = self.split_res(self.config['resolution'])
@@ -65,8 +66,8 @@ class Bot:
             self.tree_nav = TreeNavigator(self.resolution)
             analysis_time = datetime.utcnow()
             name, description, socket_instances = self.tree_nav.eval_jewel(jewel_location)
-
-
+            self.log.info('Jewel evaluation took %s seconds' %
+                           (datetime.utcnow() - analysis_time).seconds)
             for socket in socket_instances:
                 socket['description'] = description
                 socket['name'] = name
@@ -75,12 +76,11 @@ class Bot:
 
             self.store_items(socket_instances)
             
-            self.log.info('Jewel evaluation took %s seconds' %
-                           (datetime.utcnow() - analysis_time).seconds)
             # To enable the returning of items to sender, uncomment row below
             '''
             self.trader.return_items(username, jewel_locations)
             '''
+        self.log.info('Inventory analysis complete!')
 
     def store_items(self, socket_instances):
         # Add some filtered summed values for easier querying
