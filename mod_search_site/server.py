@@ -29,7 +29,7 @@ class ModSearch(object):
         self.digit_re = re.compile('[0-9]+')
         self.nondigit_re = re.compile('[^0-9]')
         self.nonalpha_re = re.compile('[^a-zA-Z]')
-        self.find_mod_value_re = re.compile('[\-\d+\))|(\d+)]+')
+        self.find_mod_value_re = re.compile('(?:\-|\+)?((?:\(\d+-\d+\))|(?:[0-9]*\.?[0-9]))')
         self.all_mods = json.load(open(FILTERED_PASSIVE_LIST, 'r'))
 
         cherrypy.server.socket_host = '0.0.0.0'
