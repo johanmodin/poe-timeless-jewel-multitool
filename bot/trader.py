@@ -25,7 +25,8 @@ class Trader:
         self.resolution = resolution
         self.config = get_config('trader')
         self.input_handler = InputHandler(self.resolution)
-        logging.basicConfig(level=logging.INFO)
+        logging.basicConfig(level=logging.INFO,
+            format='%(asctime)s %(message)s', datefmt='[%H:%M:%S %d-%m-%Y]')
         self.log = logging.getLogger('trader')
         self.trade_queue = Queue()
         self.trade_queue_set = set()

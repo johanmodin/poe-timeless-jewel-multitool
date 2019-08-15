@@ -62,16 +62,22 @@ SOCKET_MOVE_OFFSET = {
 21: (100, -1000)}
 
 X_SCALE = 0.2
-Y_SCALE = 0.2
+Y_SCALE = 0.2 # 0.15 för 1080p?
 CIRCLE_EFFECTIVE_RADIUS = 300
 
 IMAGE_FOLDER = 'data/images/'
-TEMPLATES = {'Notable.png': {'size': (30, 30), 'threshold': 0.89},
-             'NotableAllocated.png': {'size': (30, 30), 'threshold': 0.93},
-             'Jewel.png': {'size': (30, 30), 'threshold': 0.92},
-             'JewelSocketed.png': {'size': (30, 30), 'threshold': 0.9},
-             'Skill.png': {'size': (21, 21), 'threshold': 0.87},
-             'SkillAllocated.png': {'size': (21, 21), 'threshold':  0.93}}
+TEMPLATES = {'Notable.png': {'1440p_size': (30, 30), '1440p_threshold': 0.89,
+                '1080p_size': (23, 23), '1080p_threshold': 0.85},
+             'NotableAllocated.png': {'1440p_size': (30, 30), '1440p_threshold': 0.93,
+                '1080p_size': (23, 23), '1080p_threshold': 0.90},
+             'Jewel.png': {'1440p_size': (30, 30), '1440p_threshold': 0.92,
+                '1080p_size': (23, 23), '1080p_threshold': 0.92},
+             'JewelSocketed.png': {'1440p_size': (30, 30), '1440p_threshold': 0.9,
+                '1080p_size': (23, 23), '1080p_threshold': 0.9},
+             'Skill.png': {'1440p_size': (21, 21), '1440p_threshold': 0.87,
+                '1080p_size': (15, 15), '1080p_threshold': 0.91},
+             'SkillAllocated.png': {'1440p_size': (21, 21), '1440p_threshold':  0.93,
+                '1080p_size': (15, 15), '1080p_threshold': 0.91}}
 
 TXT_BOX = {'x': 32, 'y': 0, 'w': 900, 'h': 320}
 
@@ -90,16 +96,20 @@ class TreeNavigator:
     def __init__(self, resolution):
         self.resolution = resolution
         self.input_handler = InputHandler(self.resolution)
-        logging.basicConfig(level=logging.INFO)
+        logging.basicConfig(level=logging.INFO,
+            format='%(asctime)s %(message)s', datefmt='[%H:%M:%S %d-%m-%Y]')
         self.log = logging.getLogger('tree_nav')
         self.config = get_config('tree_nav')
         self.find_mod_value_re = re.compile('[\-\d+\))|(\d+)]+')
         self.nonalpha_re = re.compile('[^a-zA-Z]')
         self.origin_pos = (self.resolution[0] / 2, self.resolution[1] / 2)
         self.ingame_pos = [0, 0]
+        self.px_multiplier = self.resolution[0] / 2560
+        self.resolution_prefix = str(self.resolution[1]) + 'p_'
         self.templates_and_masks = self.load_templates()
         self.passive_mods, self.passive_names = self.generate_good_strings(mod_files)
         self.passive_nodes = list(self.passive_mods.keys()) + list(self.passive_names.keys())
+
 
 
     def eval_jewel(self, item_location):
@@ -127,12 +137,14 @@ class TreeNavigator:
         return item_name, item_desc, item_stats
 
     def load_templates(self, threshold = 128):
+
         templates_and_masks = {}
         for template_name in TEMPLATES.keys():
             template_path = os.path.join(IMAGE_FOLDER, template_name)
             img = cv2.imread(template_path, cv2.IMREAD_UNCHANGED)
 
-            size = TEMPLATES[template_name]['size']
+            size = TEMPLATES[template_name][self.resolution_prefix + 'size']
+
             channels = cv2.split(img)
             mask = None
             if len(channels) > 3:
@@ -148,17 +160,20 @@ class TreeNavigator:
         return templates_and_masks
 
     def _move_screen_to_socket(self, socket_id):
-        self.log.info('Moving close to socket %s' % socket_id)
+        self.log.debug('Moving close to socket %s' % socket_id)
         move_offset_tx, move_offset_ty = SOCKET_MOVE_OFFSET[socket_id]
         move_offset = self._tree_pos_to_xy([move_offset_tx, move_offset_ty], offset=True)
 
         socket_tx, socket_ty = SOCKETS[socket_id]
         socket_xy = self._tree_pos_to_xy([socket_tx, socket_ty])
         compensation_offset = self._find_socket(socket_xy)
-        self.log.info('Compensated navigation with %s' % compensation_offset)
+        self.log.debug('Compensated navigation with %s' % compensation_offset)
 
         move_to = [socket_xy[0] + compensation_offset[0] + move_offset[0],
                    socket_xy[1] + compensation_offset[1] + move_offset[1]]
+
+        x_offset = move_to[0] - self.resolution[0]/2
+        y_offset = move_to[1] - self.resolution[1]/2
 
         self.input_handler.click(*move_to, *move_to, button=None, raw=True, speed_factor=1)
         self.input_handler.drag(self.origin_pos[0], self.origin_pos[1], speed_factor = 1)
@@ -168,8 +183,8 @@ class TreeNavigator:
     def _click_socket(self, socket_pos, insert=True):
         self.log.debug('Clicking socket')
         xy = socket_pos
-        lt = [xy[0] - 7, xy[1] - 7]
-        rb = [xy[0] + 7, xy[1] + 7]
+        lt = [xy[0] - 5 * self.px_multiplier, xy[1] - 5 * self.px_multiplier]
+        rb = [xy[0] + 5 * self.px_multiplier, xy[1] + 5 * self.px_multiplier]
         if insert:
             self.input_handler.click(*lt, *rb, button='left', raw=True)
         else:
@@ -178,23 +193,24 @@ class TreeNavigator:
 
     def _tree_pos_to_xy(self, pos, offset=False):
         if offset:
-            return [pos[0] * X_SCALE, pos[1] * Y_SCALE]
-        uncentered_xy =  [(pos[0] - self.ingame_pos[0]) * X_SCALE,
-               (pos[1] - self.ingame_pos[1]) * Y_SCALE]
+            return [pos[0] * X_SCALE * self.px_multiplier,
+                    pos[1] * Y_SCALE * self.px_multiplier]
+        uncentered_xy =  [(pos[0] - self.ingame_pos[0]) * X_SCALE * self.px_multiplier,
+               (pos[1] - self.ingame_pos[1]) * Y_SCALE * self.px_multiplier]
         xy = [int(uncentered_xy[0] + self.origin_pos[0]),
               int(uncentered_xy[1] + self.origin_pos[1])]
         return xy
 
     def _add_xy_offset_to_tree_pos(self, offset):
-        tree_pos = [self.ingame_pos[0] + offset[0] / X_SCALE,
-                    self.ingame_pos[1] + offset[1] / Y_SCALE]
+        tree_pos = [self.ingame_pos[0] + offset[0] / (X_SCALE * self.px_multiplier),
+                    self.ingame_pos[1] + offset[1] / (Y_SCALE * self.px_multiplier)]
         return tree_pos
 
     def _analyze_nodes(self, socket_id):
         self.log.info('Analyzing nodes for socket id %s' % socket_id)
         nodes = []
         node_locations, socket_pos = self._find_nodes(socket_id)
-        self.log.info('Found %s nodes for socket id %s' % (len(node_locations), socket_id))
+        self.log.debug('Found %s nodes for socket id %s' % (len(node_locations), socket_id))
         self._click_socket(socket_pos)
         for location in node_locations:
             node_stats = self._get_node_data(location)
@@ -244,21 +260,21 @@ class TreeNavigator:
         return filtered_nodes
 
     def _find_nodes(self, socket_id):
-        self.input_handler.click(1280, 100, 1300, 120, button=None, raw=True)
+        self.input_handler.click(0.5, 0.07, 0.51, 0.083, button=None)
         socket_pos = self._tree_pos_to_xy(SOCKETS[socket_id])
         socket_offset = self._find_socket(socket_pos)
-        self.log.info('Jewel socket offset correction: %s' % socket_offset)
+        self.log.debug('Jewel socket offset correction: %s' % socket_offset)
 
         socket_pos[0] += socket_offset[0]
         socket_pos[1] += socket_offset[1]
 
         # Add some margin so that we dont accidentally cut any nodes off
-        margin = 20
+        margin = 20 * self.px_multiplier
 
-        x1 = int(socket_pos[0] - CIRCLE_EFFECTIVE_RADIUS - margin)
-        y1 = int(socket_pos[1] - CIRCLE_EFFECTIVE_RADIUS - margin)
-        x2 = int(x1 + 2 * CIRCLE_EFFECTIVE_RADIUS + 2 * margin)
-        y2 = int(y1 + 2 * CIRCLE_EFFECTIVE_RADIUS + 2 * margin)
+        x1 = int(socket_pos[0] - CIRCLE_EFFECTIVE_RADIUS * self.px_multiplier - margin)
+        y1 = int(socket_pos[1] - CIRCLE_EFFECTIVE_RADIUS * self.px_multiplier  - margin)
+        x2 = int(x1 + 2 * CIRCLE_EFFECTIVE_RADIUS * self.px_multiplier  + 2 * margin)
+        y2 = int(y1 + 2 * CIRCLE_EFFECTIVE_RADIUS * self.px_multiplier  + 2 * margin)
 
         nodes = self._get_node_locations_from_screen((x1, y1, x2, y2))
         nodes = self._filter_nodes(nodes, socket_pos)
@@ -315,29 +331,31 @@ class TreeNavigator:
         rel_node_pos_yx = np.argwhere(locations == 1)
         rel_node_pos = rel_node_pos_yx.T[::-1].T
         abs_node_pos = rel_node_pos + [box[0], box[1]]
-
         return abs_node_pos
 
     def _match_image(self, screen, template_name):
         template = self.templates_and_masks[template_name]['image']
         mask = self.templates_and_masks[template_name]['mask']
         res = cv2.matchTemplate(screen, template, cv2.TM_CCORR_NORMED, mask=mask)
-        coordinates = np.where(res >= TEMPLATES[template_name]['threshold'])
-        icon_size = TEMPLATES[template_name]['size']
+        coordinates = np.where(res >= TEMPLATES[template_name][self.resolution_prefix + 'threshold'])
+        icon_size = (int(TEMPLATES[template_name][self.resolution_prefix + 'size'][0]),
+                     int(TEMPLATES[template_name][self.resolution_prefix + 'size'][1]))
         icon_center_offset = [int(icon_size[0] / 2), int(icon_size[1] / 2)]
         centered_coordinates = [coordinates[0] + icon_center_offset[0],
                                 coordinates[1] + icon_center_offset[1]]
+
         return centered_coordinates
 
 
     def _get_node_data(self, location):
         self.log.debug('Getting node stats at location %s' % location)
-        lt = [location[0] - 7, location[1] - 7]
-        rb = [location[0] + 7, location[1] + 7]
+        lt = [location[0] - 7 * self.px_multiplier, location[1] - 7 * self.px_multiplier]
+        rb = [location[0] + 7 * self.px_multiplier, location[1] + 7 * self.px_multiplier]
         self.input_handler.click(*lt, *rb, button=None, raw=True,
                                  speed_factor=self.config['node_search_speed_factor'])
         textbox_lt = location + [TXT_BOX['x'], TXT_BOX['y']]
-        textbox_rb = textbox_lt + [TXT_BOX['w'], TXT_BOX['h']]
+        textbox_rb = textbox_lt + [int(TXT_BOX['w'] * self.px_multiplier),
+                                   int(TXT_BOX['h'] * self.px_multiplier)]
 
         jewel_area_bgr = grab_screen(tuple(np.concatenate([textbox_lt, textbox_rb])))
         return jewel_area_bgr
