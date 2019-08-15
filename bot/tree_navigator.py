@@ -314,10 +314,10 @@ class TreeNavigator:
 
         # filter nodes outside jewel socket radius
         distances_to_socket = np.sqrt(np.sum((nodes - socket_pos)**2, axis=1))
-        nodes = nodes[distances_to_socket <= CIRCLE_EFFECTIVE_RADIUS]
+        nodes = nodes[distances_to_socket <= CIRCLE_EFFECTIVE_RADIUS * self.px_multiplier]
         return nodes
 
-    def _get_node_locations_from_screen(self, box, margin=32):
+    def _get_node_locations_from_screen(self, box):
         jewel_area_bgr = grab_screen(box)
         jewel_area_gray = cv2.cvtColor(jewel_area_bgr, cv2.COLOR_BGR2GRAY)
 
