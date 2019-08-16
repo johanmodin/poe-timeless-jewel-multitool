@@ -11,10 +11,10 @@ bot:
     # position converted to pixel values. In addition, a different aspect ratio
     # might lead to a whole swathe of other problems due to changes
     # in the relative position of in game objects
-    resolution: '2560x1440'
+    resolution: '1920x1080'
     breaks_per_full_inventory: 0
     initial_sleep: 7
-    exit_hotkey: 'q'
+    exit_hotkey: 'f4'
 input_handler:
     key_press_interval: 200 # millseconds
     mouse_click_interval: 200 # millseconds
