@@ -33,6 +33,7 @@ NOTICE: Although this bot does not play the game for you, performing timed actio
 3. Close all ingame windows. No inventory or other windows should be open.
 4. Run `python3 run.py` and tab into the game.
 5. The bot will automatically socket the jewels in your inventory into every socket and record all of the affected nodes.
+6. The bot can be stopped by pressing the exit_hotkey button as defined in the config, which defaults to F4.
 
 Additionally, the bot may be set up to receive jewels through trade from players whispering to it by uncommenting the commented lines in the loop method in bot/bot.py. However, as a single jewel takes roughly 5 minutes to analyze, a full inventory of jewels would have the trader waiting 5 hours for his jewels back. Thus, this feature is not activated by default. Instead, the bot will by default solely analyze the jewels in the character's inventory.
 
