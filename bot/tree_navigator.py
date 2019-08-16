@@ -219,10 +219,16 @@ class TreeNavigator:
             if not self._run():
                 return
             node_stats = self._get_node_data(location)
-            node = {'location': [int(p) for p in location], 'stats': node_stats}
+            node = {'location': self._socket_offset_pos(socket_pos, location),
+                    'stats': node_stats}
             nodes.append(node)
         self._click_socket(socket_pos, insert=False)
         return nodes
+
+    def _socket_offset_pos(self, socket_pos, node_location):
+        circle_radius = CIRCLE_EFFECTIVE_RADIUS * self.px_multiplier
+        return [(node_location[0] - socket_pos[0]) / circle_radius,
+                (node_location[1] - socket_pos[1]) / circle_radius]
 
     def _filter_ocr_lines(self, nodes_lines, max_dist=4):
         filtered_nodes = []
