@@ -2,6 +2,7 @@ pyyaml
 pymongo
 pyautogui
 numpy
+keyboard
 pypiwin32
 opencv-contrib-python
 pytesseract

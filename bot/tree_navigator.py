@@ -7,6 +7,7 @@ import time
 import json
 import re
 
+
 from multiprocessing import Pool
 from Levenshtein import distance
 
@@ -88,12 +89,9 @@ mod_files = {
     "passivesVaalAdd": "data/passivesVaalAdditions.json",
 }
 
-### TO DO:
-# Fixa _analyze_nodes
-# Fixa så att keystones känns igen
 
 class TreeNavigator:
-    def __init__(self, resolution):
+    def __init__(self, resolution, halt_value):
         self.resolution = resolution
         self.input_handler = InputHandler(self.resolution)
         logging.basicConfig(level=logging.INFO,
@@ -109,8 +107,11 @@ class TreeNavigator:
         self.templates_and_masks = self.load_templates()
         self.passive_mods, self.passive_names = self.generate_good_strings(mod_files)
         self.passive_nodes = list(self.passive_mods.keys()) + list(self.passive_names.keys())
+        self.halt = halt_value
 
 
+    def _run(self):
+        return not bool(self.halt.value)
 
     def eval_jewel(self, item_location):
         self.ingame_pos = [0, 0]
@@ -119,6 +120,8 @@ class TreeNavigator:
         pool = Pool(self.config['ocr_threads'])
         jobs = {}
         for socket_id in sorted(SOCKETS.keys()):
+            if not self._run():
+                return None, None, None
             self._move_screen_to_socket(socket_id)
             socket_nodes = self._analyze_nodes(socket_id)
 
@@ -213,6 +216,8 @@ class TreeNavigator:
         self.log.debug('Found %s nodes for socket id %s' % (len(node_locations), socket_id))
         self._click_socket(socket_pos)
         for location in node_locations:
+            if not self._run():
+                return
             node_stats = self._get_node_data(location)
             node = {'location': [int(p) for p in location], 'stats': node_stats}
             nodes.append(node)

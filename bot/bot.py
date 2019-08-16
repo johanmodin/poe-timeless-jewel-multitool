@@ -1,19 +1,21 @@
-from queue import Queue
-from pymongo import MongoClient
-from bson.objectid import ObjectId
-from datetime import datetime
 import logging
 import time
 import sys
 import numpy as np
 import re
+import time
+import keyboard
+
+from multiprocessing import Value, Process
+from queue import Queue
+from pymongo import MongoClient
+from bson.objectid import ObjectId
+from datetime import datetime
 
 from .trader import Trader
 from .tree_navigator import TreeNavigator
 from .utils import get_config, filter_mod
 from .input_handler import InputHandler
-
-
 
 
 class Bot:
@@ -28,9 +30,14 @@ class Bot:
         self.trader = Trader(self.resolution)
         self.input_handler = InputHandler(self.resolution)
         self.db = MongoClient(self.config['db_url'])[self.config['db_name']]
-        self.run = True
+        self.halt = Value('i', False)
+        self.hotkey_killer = Process(target=hotkey_killer, args=(self.halt,))
+        self.hotkey_killer.daemon = True
+        self.hotkey_killer.start()
 
     def loop(self):
+        self.log.info('Quit the application by pressing %s'
+                      % self.config['exit_hotkey'])
         self.log.info('Bot starts in %s seconds. Please tab into the game client.'
                        % self.config['initial_sleep'])
         time.sleep(int(self.config['initial_sleep']))
@@ -51,6 +58,9 @@ class Bot:
         self.log.info('Got %s new jewels' % len(jewel_locations))
         long_break_at_idx = np.random.choice(60, self.config['breaks_per_full_inventory'])
         for idx, jewel_location in enumerate(jewel_locations):
+            if not self._run():
+                self.log.info('Exiting.')
+                return
             self.log.info('Analyzing jewel (%s/%s) with description: %s'
                           % (idx, len(jewel_locations), descriptions[idx]))
             if idx in long_break_at_idx:
@@ -63,9 +73,12 @@ class Bot:
                                % descriptions[idx])
                 continue
 
-            self.tree_nav = TreeNavigator(self.resolution)
+            self.tree_nav = TreeNavigator(self.resolution, self.halt)
             analysis_time = datetime.utcnow()
             name, description, socket_instances = self.tree_nav.eval_jewel(jewel_location)
+            if socket_instances is None:
+                self.log.info('No socket instances returned. Exiting.')
+                return
             self.log.info('Jewel evaluation took %s seconds' %
                            (datetime.utcnow() - analysis_time).seconds)
             for socket in socket_instances:
@@ -75,7 +88,7 @@ class Bot:
                 socket['reporter'] = username
 
             self.store_items(socket_instances)
-            
+
             # To enable the returning of items to sender, uncomment row below
             '''
             self.trader.return_items(username, jewel_locations)
@@ -95,9 +108,24 @@ class Bot:
                         jewel_inst['summed_mods'][filt_mod] = value
 
         result = self.db['jewels'].insert_many(socket_instances)
+        self.log.info('Stored %s analyzed jewel sockets!' % len(socket_instances))
         return result
 
 
     def split_res(self, resolution):
         resolution = [int(n) for n in resolution.split('x')]
         return resolution
+
+    def _run(self):
+        halt = bool(self.halt.value)
+        if halt:
+            self.hotkey_killer.join()
+        return not halt
+
+
+def hotkey_killer(halt_value):
+    while True:
+        if keyboard.is_pressed('f4'):
+            halt_value.value += 1
+            return
+        time.sleep(0.1)
