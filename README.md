@@ -30,12 +30,12 @@ NOTICE: Although this bot does not play the game for you, performing timed actio
 (0. Have a character with all of the tree's sockets allocated)
 1. Make sure the skill tree does not have the ascendancy blob up and is maximally zoomed out.
 2. Fill your inventory with jewels you want to search. 
-3. Close all ingame windows. No inventory or other windows should be open.
+3. Close all ingame windows. No inventory or other windows should be open. Chat should be off. 
 4. Run `python3 run.py` and tab into the game.
 5. The bot will automatically socket the jewels in your inventory into every socket and record all of the affected nodes.
 6. The bot can be stopped by pressing the exit_hotkey button as defined in the config, which defaults to F4.
 
-Additionally, the bot may be set up to receive jewels through trade from players whispering to it by uncommenting the commented lines in the loop method in bot/bot.py. However, as a single jewel takes roughly 5 minutes to analyze, a full inventory of jewels would have the trader waiting 5 hours for his jewels back. Thus, this feature is not activated by default. Instead, the bot will by default solely analyze the jewels in the character's inventory.
+Additionally, the bot may be set up to receive jewels through trade from players whispering to it by uncommenting the commented lines in the loop method in bot/bot.py. However, as a single jewel takes roughly 5 minutes to analyze, a full inventory of jewels would have the trader waiting 5 hours for his jewels back. Thus, this feature is not activated by default. Instead, the bot will by default solely analyze the jewels in the character's inventory. This feature is activated by setting accept_trades in the config file to True.
 
 The bot does not store information on how the key stones are transformed.
 
