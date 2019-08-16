@@ -31,7 +31,7 @@ class Bot:
         self.input_handler = InputHandler(self.resolution)
         self.db = MongoClient(self.config['db_url'])[self.config['db_name']]
         self.halt = Value('i', False)
-        self.hotkey_killer = Process(target=hotkey_killer, args=(self.halt,))
+        self.hotkey_killer = Process(target=hotkey_killer, args=(self.halt, self.config['exit_hotkey']))
         self.hotkey_killer.daemon = True
         self.hotkey_killer.start()
 
@@ -123,9 +123,9 @@ class Bot:
         return not halt
 
 
-def hotkey_killer(halt_value):
+def hotkey_killer(halt_value, hotkey):
     while True:
-        if keyboard.is_pressed('f4'):
+        if keyboard.is_pressed(hotkey):
             halt_value.value += 1
             return
         time.sleep(0.1)
