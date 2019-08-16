@@ -13,7 +13,6 @@ import cv2
 
 OWN_INVENTORY_ORIGIN = (0.6769531, 0.567361)
 TRADE_PARTNER_ORIGIN = (0.17578, 0.2118)
-INVITE_MESSAGE = 'inv'
 INVITATION_TIMEOUT = 30
 TRADE_TIMEOUT = 16
 TRADE_RETRIES = 2
@@ -21,20 +20,22 @@ TRADE_TIMEOUT_AFTER_INITIATED = 30
 RETURN_TRADE_TIMEOUT = 15
 
 class Trader:
-    def __init__(self, resolution):
+    def __init__(self, resolution, accept_trades):
         self.resolution = resolution
         self.config = get_config('trader')
         self.input_handler = InputHandler(self.resolution)
         logging.basicConfig(level=logging.INFO,
             format='%(asctime)s %(message)s', datefmt='[%H:%M:%S %d-%m-%Y]')
         self.log = logging.getLogger('trader')
-        self.trade_queue = Queue()
-        self.trade_queue_set = set()
-        with open(self.config['log_path'], 'r', encoding="utf8") as f:
-            for i, l in enumerate(f):
-                pass
-            byte_pos = f.tell()
-        self.byte_pos = byte_pos
+        if accept_trades:
+            self.trade_queue = Queue()
+            self.invite_message = self.config['invite_message']
+            self.trade_queue_set = set()
+            with open(self.config['log_path'], 'r', encoding="utf8") as f:
+                for i, l in enumerate(f):
+                    pass
+                byte_pos = f.tell()
+            self.byte_pos = byte_pos
 
     def stash_items(self):
         stash_loc = self._find_stash()
@@ -71,7 +72,7 @@ class Trader:
             while self.trade_queue.empty():
                 messages = self.tail(set_seeker=True)
                 for message in messages:
-                    if message['text'] == INVITE_MESSAGE and message['type'] == 'whisper':
+                    if message['text'] == self.invite_message and message['type'] == 'whisper':
                         self._put_in_trade_queue(message['user'])
                 time.sleep(0.1)
             trade_partner = self._get_from_trade_queue()

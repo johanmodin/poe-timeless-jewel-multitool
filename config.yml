@@ -1,24 +1,26 @@
 bot:
     db_url: 'mongodb://localhost:27017/'
     db_name: 'project_timeless'
-    # Note that changing the resolution is bound to cause issues as some calls to click
-    # is made with raw=True, thus pointing to the real location rather
-    # than the normalized location
-    # To run another resolution, fix the raw=True calls to click and
-    # the SOCKETS and SOCKET_MOVE_OFFSET dicts' values in tree_navigator
-    # as well as X_SCALE and Y_SCALE which controls the ratio of
-    # between the game's reported position for each socket and the
-    # position converted to pixel values. In addition, a different aspect ratio
-    # might lead to a whole swathe of other problems due to changes
-    # in the relative position of in game objects
+    # Resolution supports either '2560x1440' or '1920x1080'
     resolution: '1920x1080'
+    # breaks_per_full_inventory specifies how many ~5 min breaks to take per
+    # full inventory of jewels
     breaks_per_full_inventory: 0
     initial_sleep: 7
     exit_hotkey: 'f4'
+    # If accept_trades is set to True, the bot will try to receive jewels
+    # from other players through trade, analyze them and return them.
+    accept_trades: False
 input_handler:
     key_press_interval: 200 # millseconds
     mouse_click_interval: 200 # millseconds
 trader:
+    # if accept_trades is set to True, this message will cause the bot to
+    # invite the sending player
+    invite_message: 'inv'
+    # The log path needs to point to the Client.txt logfile in order to
+    # find the whispers and other events happening in the chat
+    # This is only needed if the accept_trades is set to True
     log_path: 'C:\Program Files (x86)\Grinding Gear Games\Path of Exile\logs\Client.txt'
 tree_nav:
     ocr_threads: 6 # How many CPU threads to use for the OCR

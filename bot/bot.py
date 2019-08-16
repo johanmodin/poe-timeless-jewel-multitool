@@ -27,7 +27,7 @@ class Bot:
         self.resolution = self.split_res(self.config['resolution'])
         self.nonalpha_re = re.compile('[^a-zA-Z]')
 
-        self.trader = Trader(self.resolution)
+        self.trader = Trader(self.resolution, self.config['accept_trades'])
         self.input_handler = InputHandler(self.resolution)
         self.db = MongoClient(self.config['db_url'])[self.config['db_name']]
         self.halt = Value('i', False)
@@ -41,59 +41,58 @@ class Bot:
         self.log.info('Bot starts in %s seconds. Please tab into the game client.'
                        % self.config['initial_sleep'])
         time.sleep(int(self.config['initial_sleep']))
-        # If you're running the trade functionality, put a while loop
-        # here and indent all code beneath it in the function
-        username = 'N/A'
-        # To enable the trading, uncomment rows below
-        '''
-        empty = self.trader.verify_empty_inventory()
-        if not empty:
-            self.trader.stash_items()
-        username = self.trader.wait_for_trade()
-        successfully_received = self.trader.get_items(username)
-        if not successfully_received:
-            continue
-        '''
-        jewel_locations, descriptions = self.trader.get_jewel_locations()
-        self.log.info('Got %s new jewels' % len(jewel_locations))
-        long_break_at_idx = np.random.choice(60, self.config['breaks_per_full_inventory'])
-        for idx, jewel_location in enumerate(jewel_locations):
-            if not self._run():
-                self.log.info('Exiting.')
-                return
-            self.log.info('Analyzing jewel (%s/%s) with description: %s'
-                          % (idx, len(jewel_locations), descriptions[idx]))
-            if idx in long_break_at_idx:
-                self.log.info('Taking a break of around 5 minutes.')
-                self.input_handler.rnd_sleep(mean=300000, sigma=100000, min=120000)
+        while True:
+            if self.config['accept_trades']:
+                empty = self.trader.verify_empty_inventory()
+                if not empty:
+                    self.trader.stash_items()
+                username = self.trader.wait_for_trade()
+                successfully_received = self.trader.get_items(username)
+                if not successfully_received:
+                    continue
+            else:
+                username = 'N/A'
+            jewel_locations, descriptions = self.trader.get_jewel_locations()
+            self.log.info('Got %s new jewels' % len(jewel_locations))
+            long_break_at_idx = np.random.choice(60, self.config['breaks_per_full_inventory'])
+            for idx, jewel_location in enumerate(jewel_locations):
+                if not self._run():
+                    self.log.info('Exiting.')
+                    return
+                self.log.info('Analyzing jewel (%s/%s) with description: %s'
+                              % (idx, len(jewel_locations), descriptions[idx]))
+                if idx in long_break_at_idx:
+                    self.log.info('Taking a break of around 5 minutes.')
+                    self.input_handler.rnd_sleep(mean=300000, sigma=100000, min=120000)
 
-            stored_equivalents = self.db['jewels'].find({'description': descriptions[idx]})
-            if stored_equivalents.count() > 0:
-                self.log.info('Jewel with descriptions %s is already analyzed, skipping!'
-                               % descriptions[idx])
-                continue
+                stored_equivalents = self.db['jewels'].find({'description': descriptions[idx]})
+                if stored_equivalents.count() > 0:
+                    self.log.info('Jewel with descriptions %s is already analyzed, skipping!'
+                                   % descriptions[idx])
+                    continue
 
-            self.tree_nav = TreeNavigator(self.resolution, self.halt)
-            analysis_time = datetime.utcnow()
-            name, description, socket_instances = self.tree_nav.eval_jewel(jewel_location)
-            if socket_instances is None:
-                self.log.info('No socket instances returned. Exiting.')
-                return
-            self.log.info('Jewel evaluation took %s seconds' %
-                           (datetime.utcnow() - analysis_time).seconds)
-            for socket in socket_instances:
-                socket['description'] = description
-                socket['name'] = name
-                socket['created'] = analysis_time
-                socket['reporter'] = username
+                self.tree_nav = TreeNavigator(self.resolution, self.halt)
+                analysis_time = datetime.utcnow()
+                name, description, socket_instances = self.tree_nav.eval_jewel(jewel_location)
+                if socket_instances is None:
+                    self.log.info('No socket instances returned. Exiting.')
+                    return
+                self.log.info('Jewel evaluation took %s seconds' %
+                               (datetime.utcnow() - analysis_time).seconds)
+                for socket in socket_instances:
+                    socket['description'] = description
+                    socket['name'] = name
+                    socket['created'] = analysis_time
+                    socket['reporter'] = username
 
-            self.store_items(socket_instances)
+                self.store_items(socket_instances)
 
-            # To enable the returning of items to sender, uncomment row below
-            '''
-            self.trader.return_items(username, jewel_locations)
-            '''
-        self.log.info('Inventory analysis complete!')
+            if self.config['accept_trades']:
+                self.trader.return_items(username, jewel_locations)
+            else:
+                self.log.info('Inventory analysis complete!')
+                break
+
 
     def store_items(self, socket_instances):
         # Add some filtered summed values for easier querying
