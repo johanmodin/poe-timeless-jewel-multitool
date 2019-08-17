@@ -65,7 +65,7 @@ class InputHandler:
     def rnd_sleep(self, min=50, mean=300, sigma=300):
         time.sleep(self._rnd(min, mean, sigma=sigma) / 1000)
 
-    def _rnd(self, min, mean, sigma=500):
+    def _rnd(self, min, mean, sigma=200):
         r = np.random.normal(mean, sigma)
         while r < min:
             r = np.random.normal(mean, sigma)
@@ -88,16 +88,15 @@ class InputHandler:
                    inventory_base[0] + slot_x * 0.02735 + 0.005625,
                    inventory_base[1] + slot_y * 0.04930555 + 0.007777,
                    speed_factor=speed_factor, button=None)
-        self._copy()
+        self._copy(speed_factor)
         win32clipboard.OpenClipboard()
         data = win32clipboard.GetClipboardData()
         win32clipboard.CloseClipboard()
         return data
 
-    def _copy(self):
+    def _copy(self, speed_factor=1):
         # Copying seems a tad unreliable, so we do it twice
-        self.click_keys([0x1d, 0x2e], speed_factor=3)
-        self.click_keys([0x1d, 0x2e])
+        self.click_keys([0x1d, 0x2e], speed_factor)
 
     def zoom(self, clicks):
         # Did not work in testing

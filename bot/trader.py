@@ -140,7 +140,7 @@ class Trader:
         item_locations = np.argwhere(slots == 1)
         jewel_descriptions = []
         for item_location in item_locations:
-            item = self.input_handler.inventory_copy(item_location[0], item_location[1], OWN_INVENTORY_ORIGIN, speed_factor=1)
+            item = self.input_handler.inventory_copy(item_location[0], item_location[1], OWN_INVENTORY_ORIGIN, speed_factor=3)
             item_type = item.split('\n')[2].strip()
 
             if item_type != 'Timeless Jewel':
