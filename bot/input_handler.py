@@ -34,23 +34,23 @@ class InputHandler:
             self.rnd_sleep(mean=self.config['mouse_click_interval'] / speed_factor)
             pyautogui.click(x=None, y=None, button=button)
 
-    def click_keys(self, keys):
-        self._press_keys(keys)
-        self._release_keys(keys)
+    def click_keys(self, keys, speed_factor=1):
+        self._press_keys(keys, speed_factor)
+        self._release_keys(keys, speed_factor)
 
     def click_hotkey(self, hotkey):
         pyautogui.press(hotkey)
         self.rnd_sleep(mean=self.config['key_press_interval'])
 
-    def _press_keys(self, keys):
+    def _press_keys(self, keys, speed_factor=1):
         for key in keys:
             PressKey(key)
-            self.rnd_sleep(mean=self.config['key_press_interval'])
+            self.rnd_sleep(mean=self.config['key_press_interval'] / speed_factor)
 
-    def _release_keys(self, keys):
+    def _release_keys(self, keys, speed_factor=1):
         for key in keys:
             ReleaseKey(key)
-            self.rnd_sleep(mean=self.config['key_press_interval'])
+            self.rnd_sleep(mean=self.config['key_press_interval'] / speed_factor)
 
     def type(self, text):
         self.click_keys([0x1c])
@@ -95,6 +95,8 @@ class InputHandler:
         return data
 
     def _copy(self):
+        # Copying seems a tad unreliable, so we do it twice
+        self.click_keys([0x1d, 0x2e], speed_factor=3)
         self.click_keys([0x1d, 0x2e])
 
     def zoom(self, clicks):
