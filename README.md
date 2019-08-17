@@ -23,6 +23,7 @@ NOTICE: Although this bot does not play the game for you, performing timed actio
 3. Move the tesseract poe tesseract config file located in data/tesseract to the tesseract config folder (courtesy of klayveR)
 4. Install and start a [MongoDB server](https://www.mongodb.com/download-center/community)
 5. Check out the config.yml file for configuration. The bot will currently only work for the 2560x1440 and 1920x1080 resolutions. 
+6. Make sure your Path of Exile key config is pretty standard, e.g. inventory on "i", nothing bound on "c", skill tree on "p".
 
 
 ### Usage
