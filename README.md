@@ -22,9 +22,9 @@ NOTICE: Although this bot does not play the game for you, performing timed actio
 (0. If you're new to Python on Windows, I recommend [downloading Anaconda](https://www.anaconda.com/distribution/#download-section) and [setting up a virtual environment](https://uoa-eresearch.github.io/eresearch-cookbook/recipe/2014/11/20/conda/))
 1. `pip install -r requirements.txt`
 2. Install tesseract [as per the instructions](https://github.com/UB-Mannheim/tesseract/wiki)
-3. Move the tesseract poe tesseract config file located in data/tesseract to the tesseract config folder (courtesy of klayveR)
+3. Move the tesseract poe tesseract config file (courtesy of klayveR) located in *data/tesseract* to the Tesseract config folder 
 4. Install and start a [MongoDB server](https://www.mongodb.com/download-center/community)
-5. Check out the config.yml file for configuration. The bot will currently only work for the 2560x1440 and 1920x1080 resolutions. 
+5. Set your resolution in the config.yml. The bot will currently only work for the 2560x1440 and 1920x1080 resolutions. 
 6. Make sure your Path of Exile key config is pretty standard, e.g. inventory on "i", nothing bound on "c", skill tree on "p".
 
 
@@ -35,7 +35,7 @@ NOTICE: Although this bot does not play the game for you, performing timed actio
 2. Fill your inventory with jewels you want to search. 
 3. Close all ingame windows. No inventory or other windows should be open. Chat should be off. 
 4. Run `python3 run.py` and tab into the game.
-5. The bot will automatically socket the jewels in your inventory into every socket and record all of the affected nodes.
+5. The bot will automatically socket the jewels in your inventory into every socket and store all of the affected nodes.
 6. The bot can be stopped by pressing the exit_hotkey button as defined in the config, which defaults to F4.
 
 Additionally, the bot may be set up to receive jewels through trade from players whispering to it by uncommenting the commented lines in the loop method in bot/bot.py. However, as a single jewel takes roughly 5 minutes to analyze, a full inventory of jewels would have the trader waiting 5 hours for his jewels back. Thus, this feature is not activated by default. Instead, the bot will by default solely analyze the jewels in the character's inventory. This feature is activated by setting accept_trades in the config file to True.
