@@ -1,9 +1,11 @@
 # poe-timeless-jewel-multitool
-A Path of Exile bot and basic site which allows the highly random timeless jewels to be searchable and presentable. It goes through all of the sockets and performs OCR on every socket node, after which it stores the data on all sockets' nodes in a Mongo database along with their random seed and other metadata to enable searching through the thousands of possible jewel-socket instances for just the stats you're looking for.
+A Path of Exile bot and basic site which allows the highly random timeless jewels to be searchable and presentable. 
+
+It's primary functionality is to analyze jewels. This is done by, for every jewel in your inventory, going through all of the sockets and performing OCR on every socket node to reveal how the jewel transforms the node. The data is stored in a Mongo database to enable searching through the thousands of possible jewel-socket instances for just the stats you're looking for.
 
 [![Tool Demonstration](https://img.youtube.com/vi/5PHUHtf39yA/0.jpg)](https://www.youtube.com/watch?v=5PHUHtf39yA)
 
-  *A quick video demonstration of the basic features.*
+  *A YouTube preview of the tool's basic features*
 
 
 A single jewel analysis consisting of analyzing 21 socket instances, around 1500 nodes and many thousands of mods takes around 240 seconds, though this will vary depending on how many cores you can spare for the OCR (measured with 6 cores).
