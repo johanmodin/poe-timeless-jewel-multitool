@@ -265,9 +265,11 @@ class TreeNavigator:
                         new_mod = re.sub(self.find_mod_value_re, str(value), self.passive_mods[best_match], count=1)
                         mods.append(new_mod)
 
-            filtered_nodes.append({'location': node['location'],
-                                   'name': names,
-                                   'mods': mods})
+            if mods:
+                filtered_nodes.append({'location': node['location'],
+                                       'name': names,
+                                       'mods': mods})
+
         return filtered_nodes
 
     def _find_nodes(self, socket_id):
