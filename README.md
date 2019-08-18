@@ -1,7 +1,7 @@
 # poe-timeless-jewel-multitool
-A Path of Exile bot and basic site which allows the highly random timeless jewels to be searchable and presentable. 
+A Path of Exile bot and simple jewel search site which allows the highly random timeless jewels to be stored and presented. 
 
-It's primary functionality is to analyze jewels. This is done by, for every jewel in your inventory, going through all of the sockets and performing OCR on every socket node to reveal how the jewel transforms the node. The data is stored in a Mongo database to enable searching through the thousands of possible jewel-socket instances for just the stats you're looking for.
+The application's primary functionality is to analyze jewels. This is done by, for every jewel in your inventory, automatically going through all of the sockets and performing OCR on every socket node to reveal how the jewel transforms the node. The data is stored in a Mongo database to enable searching through the thousands of possible jewel-socket instances for just the stats you're looking for.
 
 [![Tool Demonstration](https://img.youtube.com/vi/5PHUHtf39yA/0.jpg)](https://www.youtube.com/watch?v=5PHUHtf39yA)
 
@@ -10,7 +10,7 @@ It's primary functionality is to analyze jewels. This is done by, for every jewe
 
 A single jewel analysis consisting of analyzing 21 socket instances, around 1500 nodes and many thousands of mods takes around 240 seconds, though this will vary depending on how many cores you can spare for the OCR (measured with 6 cores).
 
-NOTICE: Although this bot does not play the game for you, performing timed actions and automated mouse movements violates Path of Exile's terms and is bannable.
+NOTICE: Although this tool is benevolent in the manner that it does not kill monsters or play the game for you in any way, performing timed actions and automated mouse movements does violate Path of Exile's terms and is bannable. 
 
 ### Requirements
 - Python 3.x (tested with 3.7)
