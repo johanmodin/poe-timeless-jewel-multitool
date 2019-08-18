@@ -98,7 +98,7 @@ class TreeNavigator:
             format='%(asctime)s %(message)s', datefmt='[%H:%M:%S %d-%m-%Y]')
         self.log = logging.getLogger('tree_nav')
         self.config = get_config('tree_nav')
-        self.find_mod_value_re = re.compile('[\-\d+\))|(\d+)]+')
+        self.find_mod_value_re = re.compile('(\(?(?:[0-9]*\.?[0-9]-?)+\)?)')
         self.nonalpha_re = re.compile('[^a-zA-Z]')
         self.origin_pos = (self.resolution[0] / 2, self.resolution[1] / 2)
         self.ingame_pos = [0, 0]
@@ -243,7 +243,7 @@ class TreeNavigator:
                     names.append(self.passive_names[filtered_line])
                 elif filtered_line in self.passive_mods:
                     filtered_mod, value = filter_mod(line, regex=self.nonalpha_re)
-                    new_mod = re.sub(self.find_mod_value_re, str(value), self.passive_mods[filtered_line])
+                    new_mod = re.sub(self.find_mod_value_re, str(value), self.passive_mods[filtered_line], count=1)
                     mods.append(new_mod)
                 else:
                     # Sometimes the OCR might return strange results. If so,
@@ -262,7 +262,7 @@ class TreeNavigator:
                         names.append(self.passive_names[best_match])
                     elif best_match in self.passive_mods:
                         filtered_mod, value = filter_mod(line, regex=self.nonalpha_re)
-                        new_mod = re.sub(self.find_mod_value_re, str(value), self.passive_mods[best_match])
+                        new_mod = re.sub(self.find_mod_value_re, str(value), self.passive_mods[best_match], count=1)
                         mods.append(new_mod)
 
             filtered_nodes.append({'location': node['location'],
