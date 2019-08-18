@@ -51,49 +51,50 @@
 
 </head>
 <body>
-	<div style="width: 200px; float: left;">
-		 <canvas id="myCanvas" width="200" height="200">
-			 <script>
-				  var canvas = document.getElementById('myCanvas');
-			    var context = canvas.getContext('2d');
-			    var centerX = canvas.width / 2;
-			    var centerY = canvas.height / 2;
-			    var radius = 70;
+	<div style="width: 100%; overflow: hidden;">
+		<div style="width: 200px; float: left;">
+			 <canvas id="myCanvas" width="200" height="200">
+				 <script>
+					  var canvas = document.getElementById('myCanvas');
+				    var context = canvas.getContext('2d');
+				    var centerX = canvas.width / 2;
+				    var centerY = canvas.height / 2;
+				    var radius = 70;
 
-			    context.beginPath();
-			    context.arc(centerX, centerY, radius, 0, 2 * Math.PI, false);
-			    context.fillStyle = 'transparent';
-			    context.fill();
-			    centerX -= 6;
-			    context.strokeText("Jewel socket IDs", centerX - 35, centerY - 80);
-			    context.strokeText("1", centerX - 10, centerY - 10);
-			    context.strokeText("2", centerX + 10, centerY - 10);
-			    context.strokeText("3", centerX, centerY + 10);
-			    context.strokeText("4", centerX - 30, centerY + 30);
-			    context.strokeText("5", centerX - 30, centerY );
-			    context.strokeText("6", centerX - 30, centerY - 30);
-			    context.strokeText("7", centerX + 30, centerY - 30);
-			    context.strokeText("8", centerX + 30, centerY );
-			    context.strokeText("9", centerX + 30, centerY + 30);
-			    context.strokeText("10", centerX , centerY + 50);
-			    context.strokeText("11", centerX - 30, centerY + 60);
-			    context.strokeText("12", centerX - 55, centerY + 30);
-			    context.strokeText("13", centerX - 63, centerY );
-			    context.strokeText("14", centerX - 55, centerY - 30);
-			    context.strokeText("15", centerX - 30, centerY - 55);
-			    context.strokeText("16", centerX , centerY - 60);
-			    context.strokeText("17", centerX + 30, centerY - 55);
-			    context.strokeText("18", centerX + 55, centerY - 30);
-			    context.strokeText("19", centerX + 63, centerY);
-			    context.strokeText("20", centerX + 55, centerY + 30);
-			    context.strokeText("21", centerX + 30, centerY + 60);
-			    context.lineWidth = 2;
-			    context.strokeStyle = '#003300';
-			    context.stroke();
-				</script>
-			</canvas>
-		</div>
-    <div class="container">
+				    context.beginPath();
+				    context.arc(centerX, centerY, radius, 0, 2 * Math.PI, false);
+				    context.fillStyle = 'transparent';
+				    context.fill();
+				    centerX -= 6;
+				    context.strokeText("Jewel socket IDs", centerX - 35, centerY - 80);
+				    context.strokeText("1", centerX - 10, centerY - 10);
+				    context.strokeText("2", centerX + 10, centerY - 10);
+				    context.strokeText("3", centerX, centerY + 10);
+				    context.strokeText("4", centerX - 30, centerY + 30);
+				    context.strokeText("5", centerX - 30, centerY );
+				    context.strokeText("6", centerX - 30, centerY - 30);
+				    context.strokeText("7", centerX + 30, centerY - 30);
+				    context.strokeText("8", centerX + 30, centerY );
+				    context.strokeText("9", centerX + 30, centerY + 30);
+				    context.strokeText("10", centerX , centerY + 50);
+				    context.strokeText("11", centerX - 30, centerY + 60);
+				    context.strokeText("12", centerX - 55, centerY + 30);
+				    context.strokeText("13", centerX - 63, centerY );
+				    context.strokeText("14", centerX - 55, centerY - 30);
+				    context.strokeText("15", centerX - 30, centerY - 55);
+				    context.strokeText("16", centerX , centerY - 60);
+				    context.strokeText("17", centerX + 30, centerY - 55);
+				    context.strokeText("18", centerX + 55, centerY - 30);
+				    context.strokeText("19", centerX + 63, centerY);
+				    context.strokeText("20", centerX + 55, centerY + 30);
+				    context.strokeText("21", centerX + 30, centerY + 60);
+				    context.lineWidth = 2;
+				    context.strokeStyle = '#003300';
+				    context.stroke();
+					</script>
+				</canvas>
+			</div>
+    <div class="container" style="margin-left: 220px;">
         <div class="row">
             <div class="eleven columns">
                 <h1>Timeless Jewel Search</h1>
