@@ -51,7 +51,7 @@ class ModSearch(object):
         projection = {'name': 1, 'description': 1, 'reported': 1, 'created': 1,
                       'socket_id': 1, 'socket_nodes': 1, 'socket_nodes': 1,
                       "sum": {"$sum": query_mods}}
-        searched_mod_projection = {'searched_mods': {mod[1]: '$summed_mods.%s' % mod[0]
+        searched_mod_projection = {'searched_mods': {self._replace_value(mod[1]): '$summed_mods.%s' % mod[0]
                                                      for mod in candidate_mod_data}}
         projection.update(searched_mod_projection)
 
@@ -65,12 +65,18 @@ class ModSearch(object):
             searched_mods = []
             for mod in jewel['searched_mods'].keys():
                 value = jewel['searched_mods'][mod]
-                new_mod = re.sub(self.find_mod_value_re, str(value), mod)
+                new_mod = re.sub('<VALUE>', str(value), mod, count=1)
                 searched_mods.append(new_mod)
             jewel['searched_mods'] = searched_mods
             docs_to_return.append(jewel)
 
         return [dumps(docs_to_return)]
+
+    def _replace_value(self, mod):
+        # We replace the value of the mods that are used in the mongo
+        # query as they may otherwise cause errors due to being interpreted
+        # as commands
+        return re.sub(self.find_mod_value_re, '<VALUE>', mod)
 
     def _filter_mod(self, term):
         filt_mod = re.sub(self.nonalpha_re, '', term[0]).lower()
