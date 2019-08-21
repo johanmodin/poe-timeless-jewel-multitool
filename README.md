@@ -1,7 +1,7 @@
 # poe-timeless-jewel-multitool
-A Path of Exile bot and simple jewel search site which allows the highly random timeless jewels to be stored and presented. 
+A Path of Exile timeless jewel analyzing bot and simple jewel search site which allows the highly random timeless jewels to be stored and presented. 
 
-The application's primary functionality is to analyze jewels. This is done by, for every jewel in your inventory, automatically going through all of the sockets and performing OCR on every socket node to reveal how the jewel transforms the node. The data is stored in a Mongo database to enable searching through the thousands of possible jewel-socket instances for just the stats you're looking for.
+The application is able to analyze timeless jewels. This is done by, for every jewel in your inventory, automatically going through all of the sockets and performing OCR on every socket node to reveal how the jewel transforms the node. The data is stored in a Mongo database to enable searching through the thousands of possible jewel-socket instances for just the stats you're looking for.
 
 [![Tool Demonstration](https://img.youtube.com/vi/5PHUHtf39yA/0.jpg)](https://www.youtube.com/watch?v=5PHUHtf39yA)
 
@@ -10,7 +10,7 @@ The application's primary functionality is to analyze jewels. This is done by, f
 
 A single jewel analysis consisting of analyzing 21 socket instances, around 1500 nodes and many thousands of mods takes around 240 seconds, though this will vary depending on how many cores you can spare for the OCR (measured with 6 cores).
 
-NOTICE: Although this tool is benevolent in the manner that it does not kill monsters or play the game for you in any way, performing timed actions and automated mouse movements does violate Path of Exile's terms and is bannable. 
+NOTICE: Although this tool is benevolent in the manner that it does not help you kill monsters or make you richer directly in any way, performing timed actions and automated mouse movements does violate Path of Exile's terms and is bannable. 
 
 ### Requirements
 - Python 3.x (tested with 3.7)
@@ -20,12 +20,13 @@ NOTICE: Although this tool is benevolent in the manner that it does not kill mon
 
 ### Setup
 (0. If you're new to Python on Windows, I recommend [downloading Anaconda](https://www.anaconda.com/distribution/#download-section) and [setting up a virtual environment](https://uoa-eresearch.github.io/eresearch-cookbook/recipe/2014/11/20/conda/))
-1. `pip install -r requirements.txt`
+1. `pip3 install -r requirements.txt`
 2. Install tesseract [as per the instructions](https://github.com/UB-Mannheim/tesseract/wiki)
 3. Move the tesseract poe tesseract config file (courtesy of klayveR) located in *data/tesseract* to the Tesseract config folder 
 4. Install and start a [MongoDB server](https://www.mongodb.com/download-center/community)
-5. Set your resolution in the config.yml. The bot will currently only work for the 2560x1440 and 1920x1080 resolutions. 
-6. Make sure your Path of Exile key config is pretty standard, e.g. inventory on "i", nothing bound on "c", skill tree on "p".
+5. Install the accompanying database by extracting `database.json` from `database.zip` and importing it to your Mongo database by running `mongoimport --db project_timeless --collection jewels --file database.json`
+6. Set your resolution in the config.yml. The bot will currently only work for the 2560x1440 and 1920x1080 resolutions. 
+7. Make sure your Path of Exile key config is pretty standard, e.g. inventory on "i", nothing bound on "c", skill tree on "p".
 
 
 ### Usage
