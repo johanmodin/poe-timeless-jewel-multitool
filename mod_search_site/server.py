@@ -48,7 +48,7 @@ class ModSearch(object):
         candidate_mod_data = self._get_candidates(filtered_mod_data)
 
         query_mods = [{'$multiply': ['$summed_mods.%s' % data[0], float(data[2])]} for data in candidate_mod_data]
-        projection = {'name': 1, 'description': 1, 'reported': 1, 'created': 1,
+        projection = {'name': 1, 'description': 1, 'reporter': 1, 'created': 1,
                       'socket_id': 1, 'socket_nodes': 1, 'socket_nodes': 1,
                       "sum": {"$sum": query_mods}}
         searched_mod_projection = {'searched_mods': {self._replace_value(mod[1]): '$summed_mods.%s' % mod[0]
