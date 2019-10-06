@@ -14,7 +14,7 @@ NOTICE: Although this tool is benevolent in the manner that it does not help you
 
 ### Requirements
 - Python 3.x (tested with 3.7)
-- Tesseract
+- Tesseract (tested with 5.0.0 alpha 20190708)
 - MongoDB
 - Python packages as specified by `requirements.txt`
 
