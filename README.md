@@ -21,7 +21,7 @@ NOTICE: Although this tool is benevolent in the manner that it does not help you
 ### Setup
 (0. If you're new to Python on Windows, I recommend [downloading Anaconda](https://www.anaconda.com/distribution/#download-section) and [setting up a virtual environment](https://uoa-eresearch.github.io/eresearch-cookbook/recipe/2014/11/20/conda/))
 1. `pip3 install -r requirements.txt`
-2. Install tesseract [as per the instructions](https://github.com/UB-Mannheim/tesseract/wiki)
+2. Install tesseract [as per the instructions](https://github.com/UB-Mannheim/tesseract/wiki) (make sure that tesseract is in your PATH)
 3. Move the tesseract poe tesseract config file (courtesy of klayveR) located in *data/tesseract* to the Tesseract config folder 
 4. Install and start a [MongoDB server](https://www.mongodb.com/download-center/community)
 5. Install the accompanying database by extracting `database.json` from `database.zip` and importing it to your Mongo database by running `mongoimport --db project_timeless --collection jewels --file database.json`
