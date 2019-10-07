@@ -23,7 +23,7 @@ NOTICE: Although this tool is benevolent in the manner that it does not help you
 1. `pip3 install -r requirements.txt`
 2. Install tesseract [as per the instructions](https://github.com/UB-Mannheim/tesseract/wiki) (make sure that tesseract is in your PATH)
 3. Move the tesseract poe tesseract config file (courtesy of klayveR) located in *data/tesseract* to the Tesseract config folder 
-4. Install and start a [MongoDB server](https://www.mongodb.com/download-center/community)
+4. [Install](https://www.mongodb.com/download-center/community) and [start](https://docs.mongodb.com/v3.2/tutorial/install-mongodb-on-windows/#start-mongodb) a MongoDB server
 5. If you want to search through a lot of jewels for one with the correct stats, you should install the accompanying database by extracting `database.json` from `database.zip` and importing it to your Mongo database by running `mongoimport --db project_timeless --collection jewels --file database.json`, this will allow you to search roughly 700 jewel instances
 6. Set your resolution in the config.yml. The bot will currently only work for the 2560x1440 and 1920x1080 resolutions. 
 7. Make sure your Path of Exile key config is pretty standard, e.g. inventory on "i", nothing bound on "c", skill tree on "p".
