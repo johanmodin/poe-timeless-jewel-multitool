@@ -48,3 +48,11 @@ A (very) simple site for searching through the database of jewels for specific m
 
 
 ![alt text](https://github.com/johanahlqvist/poe-timeless-jewel-recorder/blob/master/site_example.png)
+
+### Contributing to the db
+If you have found and analyzed a sizeable amount of new jewels and wish to contribute to the database, you are more than welcome to upload your database to the repository! By doing this, we will eventually be able to get a complete map of all possible jewels. To do this, follow the few, simple steps outlined below.
+1. Get the newest version of the database from this repository (i.e. the database.zip file) and extract the database.json from the zip-file
+2. Import the repository's database into your database by performing the same command as in the setup. `mongoimport --db project_timeless --collection jewels --file database.json`
+3. Delete the old `database.json` file and dump the updated database to a new json-file by running `mongoexport --db project_timeless --collection jewels --out database.json`
+4. Zip the `database.json` file and either 1) send it directly to me (ponen) in the [Historic Bazaar discord server](https://discord.gg/yWfZNHA) or 2. if you're into git, perform a pull request with the new database
+
