@@ -8,3 +8,4 @@ opencv-contrib-python==4.1.0.25
 pytesseract==0.2.7
 python-Levenshtein-wheels==0.13.1
 cherrypy==18.1.2
+tqdm==4.32.2

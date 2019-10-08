@@ -1,19 +1,14 @@
-import yaml
-import os
-import time
+from pymongo import MongoClient
+from tqdm import tqdm
 import json
 import numpy as np
 
-from pymongo import MongoClient
-from tqdm import tqdm
+from .utils import get_config
 
 
-def get_config(module_name):
-    config_path = os.path.abspath('config.yml')
-    config = yaml.safe_load(open(config_path, 'r'))
-    return config[module_name]
-
-def rebuild_mean_mod_json(db):
+def rebuild_json():
+    config = get_config('mod_search_site')
+    db = MongoClient(config['db_url'], 27017)[config['db_name']]
     all_mods = {}
     jewel_instances = db['jewels'].find({})
 

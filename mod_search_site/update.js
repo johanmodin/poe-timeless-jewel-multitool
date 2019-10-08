@@ -7,6 +7,7 @@ function append_to_dom(data) {
     if (data.length == 0) {
         return
     }
+
     var blocks = data.map(function (jewel) {
         var block = "<div class=nine_columns>";
         block += "<div class='row'><div><span><h5>" + jewel.name + "</h5></span></a></div>";
@@ -68,6 +69,14 @@ function search() {
         data: {
             "search_terms": JSON.stringify(search_terms)
         }
+    }).done(function (data) {
+        append_to_dom(data);
+    });
+}
+
+function showLatest() {
+    $.ajax({
+        url: "show_latest_jewels"
     }).done(function (data) {
         append_to_dom(data);
     });

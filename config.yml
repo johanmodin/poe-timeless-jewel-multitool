@@ -14,6 +14,8 @@ bot:
 input_handler:
     key_press_interval: 200 # millseconds
     mouse_click_interval: 200 # millseconds
+# The trader section is only needed to be set if you want to use the
+# trading functionality.
 trader:
     # if accept_trades is set to True, this message will cause the bot to
     # invite the sending player
@@ -23,9 +25,17 @@ trader:
     # This is only needed if the accept_trades is set to True
     log_path: 'C:\Program Files (x86)\Grinding Gear Games\Path of Exile\logs\Client.txt'
 tree_nav:
-    ocr_threads: 6 # How many CPU threads to use for the OCR
-    node_search_speed_factor: 3 # Divides the sleep timer of node search. Higher = faster.
+    # How many CPU processes to use for the OCR
+    ocr_threads: 6
+    # Divides the sleep timer of node search. Higher value = faster analyzing.
+    # Could cause issues if set higher.
+    node_search_speed_factor: 3
 mod_search_site:
     db_url: 'mongodb://localhost:27017/'
     db_name: 'project_timeless'
-    jewels_per_search: 20
+    # The number of jewels to return in a search
+    jewels_per_search: 50
+    # The number of mods to show when listing the latest jewel additions to
+    # the database. The mods shown when looking at the latest additions are the
+    # mods that deviate the most from the mean of that mod.
+    n_notable_mods_to_display: 3
