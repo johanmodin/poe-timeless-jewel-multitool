@@ -46,6 +46,8 @@ The bot does not store information on how the key stones are transformed.
 #### Site
 A (very) simple site for searching through the database of jewels for specific mods is available in the site folder. It is run with `python3 run_site.py` and hosted [locally](http://127.0.0.1:8080). It allows searching for mods by comparing the levenshtein distance to known mods as well as weighting them such that mods with widely different value magnitudes can be summed together in a meaningful way. 
 
+Additionally, there is a feature for showing the latest jewel additions to the database. The mods shown in green when using this feature are the jewel's mods that are the most interesting based on a simple metric. This metric is simply the factor of how much greater that mod's value is than the average value of that mod, based on all jewels in the database. For example, if a jewel has a sum of 120% to Melee Critical Multiplier and the average jewel with that mod has, say, 40% to Melee Critical Multiplier, that mod would receive a score of 3. The mods displayed with a green background are the ones that had the highest such scores.
+
 
 ![alt text](https://github.com/johanahlqvist/poe-timeless-jewel-recorder/blob/master/site_example.png)
 
