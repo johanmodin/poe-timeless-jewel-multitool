@@ -75,6 +75,10 @@ TEMPLATES = {'Notable.png': {'1440p_size': (30, 30), '1440p_threshold': 0.89,
                 '1080p_size': (23, 23), '1080p_threshold': 0.92},
              'JewelSocketed.png': {'1440p_size': (30, 30), '1440p_threshold': 0.9,
                 '1080p_size': (23, 23), '1080p_threshold': 0.9},
+             'LargeJewel.png': {'1440p_size': (39, 39), '1440p_threshold': 0.9,
+                '1080p_size': (30, 30), '1080p_threshold': 0.88},
+             'LargeJewelSocketed.png': {'1440p_size': (39, 39), '1440p_threshold': 0.9,
+                '1080p_size': (30, 30), '1080p_threshold': 0.88},
              'Skill.png': {'1440p_size': (21, 21), '1440p_threshold': 0.87,
                 '1080p_size': (15, 15), '1080p_threshold': 0.91},
              'SkillAllocated.png': {'1440p_size': (21, 21), '1440p_threshold':  0.93,
@@ -301,7 +305,7 @@ class TreeNavigator:
 
         locations = np.zeros((side_len, side_len))
 
-        for template_name in ['Jewel.png', 'JewelSocketed.png']:
+        for template_name in ['Jewel.png', 'JewelSocketed.png', 'LargeJewel.png', 'LargeJewelSocketed.png']:
             centered_coordinates = self._match_image(socket_area, template_name)
             locations[tuple(centered_coordinates)] = 1
 
