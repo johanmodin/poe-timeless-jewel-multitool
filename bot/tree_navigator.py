@@ -428,18 +428,25 @@ class OCR:
     @staticmethod
     def getFilteredImage(src):
         srcH, srcW = src.shape[:2]
-        src = cv2.resize(src, (int(srcW * 1.5), int(srcH * 1.5)))
+        src = cv2.resize(src, (int(srcW * 2), int(srcH * 2)))
 
         # HSV thresholding to get rid of as much background as possible
         src = cv2.cvtColor(src, cv2.COLOR_BGRA2BGR)
         hsv = cv2.cvtColor(src.copy(), cv2.COLOR_BGR2HSV)
-        lower_blue = np.array([0, 0, 180])
-        upper_blue = np.array([180, 38, 255])
-        mask = cv2.inRange(hsv, lower_blue, upper_blue)
+        # Define 2 masks and combine them
+        # mask1 for blue affix text
+        # mask2 for yellow passive node name
+        lower_blue = np.array([80, 10, 40])
+        upper_blue = np.array([130, 180, 255])
+        lower_yellow = np.array([10, 10, 190])
+        upper_yellow = np.array([30, 200, 255])
+        mask1 = cv2.inRange(hsv, lower_blue, upper_blue)
+        mask2 = cv2.inRange(hsv, lower_yellow, upper_yellow)
+        mask = cv2.bitwise_or(mask1, mask2)
         result = cv2.bitwise_and(src, src, mask = mask)
         b, g, r = cv2.split(result)
-        g = OCR.clahe(g, 5, (5, 5))
-        inverse = cv2.bitwise_not(g)
+        b = OCR.clahe(b, 5, (5, 5))
+        inverse = cv2.bitwise_not(b)
         return inverse
 
     @staticmethod
