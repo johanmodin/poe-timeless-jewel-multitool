@@ -1,4 +1,4 @@
-pyyaml==5.1.1
+pyyaml==5.4
 pymongo==3.8.0
 pyautogui==0.9.47
 numpy>=1.17.3
