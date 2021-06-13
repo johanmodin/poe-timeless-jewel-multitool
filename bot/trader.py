@@ -155,7 +155,6 @@ class Trader:
                 item_location[0], item_location[1], OWN_INVENTORY_ORIGIN, speed_factor=3
             )
             item_type = item.split("\n")[3].strip()
-            print(item_type)
 
             if item_type != "Timeless Jewel":
                 slots[item_location[0], item_location[1]] = 0

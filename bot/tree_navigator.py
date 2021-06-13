@@ -357,8 +357,6 @@ class TreeNavigator:
             dx = desired_tree_pos[0] - self.ingame_pos[0]
             dy = desired_tree_pos[1] - self.ingame_pos[1]
 
-            print('tree delta: {}, {} - screen delta: {}, {} - drag delta: {}, {} -  effective delta: {}, {} - ingame pos: {}, {}'.format(dx, dy, screen_move_x, screen_move_y, drag_x, drag_y, effective_move_x, effective_move_y, self.ingame_pos[0], self.ingame_pos[1]))
-
     def _locate_screen_using_ambidexterity(self):
         # Essentially, this is _move_to_tree_pos_using_spaces but
         # only used to find the tree position by navigating to a known point

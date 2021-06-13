@@ -65,9 +65,7 @@ class Bot:
             long_break_at_idx = np.random.choice(
                 60, self.config["breaks_per_full_inventory"]
             )
-            self.log.info(jewel_locations)
             for idx, jewel_location in enumerate(jewel_locations):
-
                 if not self._run():
                     self.log.info("Exiting.")
                     return
