@@ -5,6 +5,7 @@ import win32gui
 import time
 from multiprocessing import Process, Manager
 
+
 class RectManager:
     def __init__(self, managed_dict):
         self.managed_dict = managed_dict
@@ -28,6 +29,7 @@ class RectManager:
             return True
         return False
 
+
 class Rectangle:
     def __init__(self, x, y, side_length, thickness, color):
         self.x = x
@@ -36,28 +38,59 @@ class Rectangle:
         self.thickness = thickness
         self.color = color
 
+
 def _draw_worker(draw_list):
-    print('nd')
+    print("nd")
     pygame.init()
     screen = pygame.display.set_mode((2560, 1440), pygame.NOFRAME)
     fuchsia = (255, 0, 128)  # Transparency color
     # Set window transparency color
     hwnd = pygame.display.get_wm_info()["window"]
-    win32gui.SetWindowLong(hwnd, win32con.GWL_EXSTYLE,
-                           win32gui.GetWindowLong(hwnd, win32con.GWL_EXSTYLE) | win32con.WS_EX_LAYERED)
-    win32gui.SetLayeredWindowAttributes(hwnd, win32api.RGB(*fuchsia), 0, win32con.LWA_COLORKEY)
+    win32gui.SetWindowLong(
+        hwnd,
+        win32con.GWL_EXSTYLE,
+        win32gui.GetWindowLong(hwnd, win32con.GWL_EXSTYLE) | win32con.WS_EX_LAYERED,
+    )
+    win32gui.SetLayeredWindowAttributes(
+        hwnd, win32api.RGB(*fuchsia), 0, win32con.LWA_COLORKEY
+    )
     done = False
     while not done:
-        print('nd')
+        print("nd")
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 done = True
         for rect_key in draw_list.keys():
             rect = draw_list[rect_key]
             screen.fill(fuchsia)  # Transparent background
-            pygame.draw.rect(screen, rect.color, pygame.Rect(rect.x, rect.y, rect.side_length, rect.thickness))
-            pygame.draw.rect(screen, rect.color, pygame.Rect(rect.x, rect.y, rect.thickness, rect.side_length))
-            pygame.draw.rect(screen, rect.color, pygame.Rect(rect.x + rect.side_length, rect.y, rect.thickness, rect.side_length))
-            pygame.draw.rect(screen, rect.color, pygame.Rect(rect.x, rect.y + rect.side_length, rect.side_length + rect.thickness, rect.thickness))
+            pygame.draw.rect(
+                screen,
+                rect.color,
+                pygame.Rect(rect.x, rect.y, rect.side_length, rect.thickness),
+            )
+            pygame.draw.rect(
+                screen,
+                rect.color,
+                pygame.Rect(rect.x, rect.y, rect.thickness, rect.side_length),
+            )
+            pygame.draw.rect(
+                screen,
+                rect.color,
+                pygame.Rect(
+                    rect.x + rect.side_length, rect.y, rect.thickness, rect.side_length
+                ),
+            )
+            pygame.draw.rect(
+                screen,
+                rect.color,
+                pygame.Rect(
+                    rect.x,
+                    rect.y + rect.side_length,
+                    rect.side_length + rect.thickness,
+                    rect.thickness,
+                ),
+            )
         pygame.display.update()
+
+
 #
