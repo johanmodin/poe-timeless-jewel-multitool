@@ -1,13 +1,14 @@
+import cherrypy
+import json
+import math
 import os, os.path
 import random
+import re
 import string
 import time
-import cherrypy
-import re
-import json
 
-from Levenshtein import distance
 from bson.json_util import dumps
+from fuzzywuzzy import fuzz
 from pymongo import MongoClient
 from os import path, curdir
 
@@ -46,7 +47,7 @@ class ModSearch(object):
     def search(self, search_terms):
         search_terms = json.loads(search_terms)
         coll = self.db["jewels"]
-        filtered_mod_data = [self._filter_mod(mod_data) for mod_data in search_terms.items()]
+        filtered_mod_data = [self._filter_mod(mod_data) for mod_data in search_terms.items() if len(self._filter_mod(mod_data)) > 0]
         candidate_mod_data = self._get_candidates(filtered_mod_data)
 
         query_mods = [{'$multiply': ['$summed_mods.%s' % data[0], float(data[2])]} for data in candidate_mod_data]
@@ -127,19 +128,30 @@ class ModSearch(object):
 
     def _get_candidates(self, mods_data):
         candidates = []
-
         for mod_data in mods_data:
             mod_name, mod_weight = mod_data
             best_match = None
-            best_distance = 99999999999
+            best_score = -math.inf
             for stored_mod in self.all_mods.keys():
-                d = distance(mod_name, stored_mod)
-                if d < best_distance:
-                    best_distance = d
+                score = self._mod_score(mod_name, stored_mod)
+                if score > best_score:
+                    best_score = score
                     best_match = stored_mod
             candidates.append((best_match, self.all_mods[best_match], mod_weight))
-
         return candidates
+
+    def _mod_score(self, mod_name, stored_mod):
+        if mod_name not in stored_mod:
+            # If there is no exact match, we can probably get something
+            # decent with fuzzy matching. As exact matches are preferred,
+            # the raw ratio is returned as the score of this method
+            # which is in the [0, 1] range
+            return fuzz.WRatio(mod_name, stored_mod) / 100
+        else:
+            # The exact match is always preferred
+            # so we place it in the [1, 2] score range
+            # with fewer additional characters being promoted
+            return 1 + len(mod_name) / (len(stored_mod) + 1)
 
 
 cherrypy.quickstart(ModSearch(), "/", { "/static": {
