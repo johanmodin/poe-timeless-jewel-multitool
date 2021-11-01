@@ -94,7 +94,7 @@ group_str='"group":'
 node_list=[]
 next_node_trigger='        },'
 end_trigger='    },'
-non_skills=['ascendancyName','Small Jewel Socket','Medium Jewel Socket','isBlighted','isMastery','isProxy']
+non_skills=['ascendancyName','Small Jewel Socket','Medium Jewel Socket','isBlighted','isMastery','isProxy','classStart']
 while current_line<total_lines:
 	if lined_input[current_line][:10]==next_node_trigger:
 		#add the next node into the node list
