@@ -30,12 +30,6 @@
         ], 
         "type": "regular"
     }, 
-    "Attack Dodge": {
-        "passives": [
-            "1% chance to Dodge Attack Hits"
-        ], 
-        "type": "regular"
-    }, 
     "Attack Speed": {
         "passives": [
             "(3-4)% increased Attack Speed"
@@ -54,6 +48,12 @@
             "(3-4)% additional Physical Damage Reduction"
         ], 
         "type": "notable"
+    }, 
+    "Avoid Elemental Ailments": {
+        "passives": [
+            "3% chance to Avoid Elemental Ailments"
+        ], 
+        "type": "regular"
     }, 
     "Axiom Warden": {
         "passives": [
@@ -497,7 +497,7 @@
     }, 
     "Jungle Paths": {
         "passives": [
-            "4% chance to Dodge Attack Hits", 
+            "(8-10)% chance to Avoid Elemental Ailments", 
             "(8-10)% chance to Avoid being Stunned"
         ], 
         "type": "notable"
@@ -624,7 +624,7 @@
     }, 
     "Purity Rebel": {
         "passives": [
-            "6% chance to Dodge Spell Hits"
+            "12% chance to Suppress Spell Damage"
         ], 
         "type": "notable"
     }, 
@@ -758,7 +758,7 @@
     }, 
     "Secret Tunnels": {
         "passives": [
-            "6% chance to Dodge Attack Hits"
+            "20% chance to Avoid Elemental Ailments"
         ], 
         "type": "notable"
     }, 
@@ -823,9 +823,9 @@
         ], 
         "type": "regular"
     }, 
-    "Spell Dodge": {
+    "Spell Suppression": {
         "passives": [
-            "1% chance to Dodge Spell Hits"
+            "+2% chance to Suppress Spell Damage"
         ], 
         "type": "regular"
     }, 
@@ -882,7 +882,7 @@
     }, 
     "Temple Paths": {
         "passives": [
-            "4% chance to Dodge Spell Hits", 
+            "6% chance to Suppress Spell Damage", 
             "+(8-10)% to all Elemental Resistances"
         ], 
         "type": "notable"
