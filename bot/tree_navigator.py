@@ -8,6 +8,8 @@ import json
 import re
 import pickle
 
+from PIL import Image
+
 #two kinds of coordinates: 
 #absolute tree coordinates, which match the json perfectly. these are prefixed by tree_ (origin center of scion)
 #screen coordinates, which describe where on the screen things are (origin top left pixel on screen)
@@ -27,7 +29,7 @@ t2s_scale = 1080/10000.0
 
 #passive tree bounds on where the center can move (in 1080p pixels)
 #used to figure out where we are.
-TREE_BOUND_Y = [-1004,1000]
+TREE_BOUND_Y = [-1003,1000]
 TREE_BOUND_X = [-595,595]
 
 #pull node information from the processed tree
@@ -35,19 +37,16 @@ f=open("data/processed_tree.pckl", 'rb')
 node_coords=pickle.load(f)
 neighbor_nodes=pickle.load(f)
 
+SOCKET_IDS = [6230 , 48768 , 31683 , 
+28475, 33631 , 36634 , 41263 , 33989 , 34483 , 
+54127, 2491 , 26725 , 55190 , 26196 , 7960 , 61419 , 21984 , 61834 , 32763 , 60735 , 46882]
 
 IMAGE_FOLDER = "data/images/"
 
 # We're using a lot of template matching and all templates are defined here
 # with matching thresholds (scores) and sizes per resolution
-# these won't be relevant yet
+# the 1440p values can be all sorts of wrong.
 TEMPLATES = {
-    "AmbidexterityCluster.png": {
-        "1440p_size": (34, 34),
-        "1440p_threshold": 0.95,
-        "1080p_size": (26, 26),
-        "1080p_threshold": 0.95,
-    },
     "FreeSpace.png": {
         "1440p_size": (41, 41),
         "1440p_threshold": 0.98,
@@ -55,6 +54,13 @@ TEMPLATES = {
         "1080p_threshold": 0.98,
     },
 }
+for ID in SOCKET_IDS:
+    TEMPLATES[str(ID)+".png"] = {
+        "1440p_size": (34, 34),
+        "1440p_threshold": 0.95,
+        "1080p_size": (29, 29),
+        "1080p_threshold": 0.95,
+    }
 
 # Defines the position of the text box which is cropped out and OCR'd per node
 TXT_BOX = {"x": 32, "y": 0, "w": 900, "h": 320}
@@ -101,83 +107,18 @@ class TreeNavigator:
         pool = Pool(self.config["ocr_threads"])
         jobs = {}
 
-#move all the way bottom right, do cluster there
+#move all the way bottom right, establish where we are.
         self._locate_screen(3)
-        socket_nodes = self._analyze_nodes(46882)
-        jobs[46882] = pool.map_async(OCR.node_to_strings, socket_nodes)
-#move to armor,evasion,life
-        self._move_screen_to_node(35568)
-        socket_nodes = self._analyze_nodes(28475)
-        jobs[28475] = pool.map_async(OCR.node_to_strings, socket_nodes)
-        socket_nodes = self._analyze_nodes(54127)
-        jobs[54127] = pool.map_async(OCR.node_to_strings, socket_nodes)
-        socket_nodes = self._analyze_nodes(34483)
-        jobs[34483] = pool.map_async(OCR.node_to_strings, socket_nodes)
-        if not self._run():
-            return None, None, None
-#move bottom left, cluster there
-        self._locate_screen(2)
-        socket_nodes = self._analyze_nodes(2491)
-        jobs[2491] = pool.map_async(OCR.node_to_strings, socket_nodes)
-#move to random int node
-        self._move_screen_to_node(44606)
-        socket_nodes = self._analyze_nodes(55190)
-        jobs[55190] = pool.map_async(OCR.node_to_strings, socket_nodes)
-        socket_nodes = self._analyze_nodes(26725)
-        jobs[26725] = pool.map_async(OCR.node_to_strings, socket_nodes)
-        socket_nodes = self._analyze_nodes(33631)
-        jobs[33631] = pool.map_async(OCR.node_to_strings, socket_nodes)
-        if not self._run():
-            return None, None, None
-#move to random node
-        self._move_screen_to_node(14151)
-        socket_nodes = self._analyze_nodes(26196)
-        jobs[26196] = pool.map_async(OCR.node_to_strings, socket_nodes)
-        socket_nodes = self._analyze_nodes(36634)
-        jobs[36634] = pool.map_async(OCR.node_to_strings, socket_nodes)
-        socket_nodes = self._analyze_nodes(41263)
-        jobs[41263] = pool.map_async(OCR.node_to_strings, socket_nodes)
-        if not self._run():
-            return None, None, None
-#move top left, cluster there
-        self._locate_screen(1)
-#move to random node
-        self._move_screen_to_node(4367)
-        socket_nodes = self._analyze_nodes(7960)
-        jobs[7960] = pool.map_async(OCR.node_to_strings, socket_nodes)
-        socket_nodes = self._analyze_nodes(61419)
-        jobs[61419] = pool.map_async(OCR.node_to_strings, socket_nodes)
-        socket_nodes = self._analyze_nodes(21984)
-        jobs[21984] = pool.map_async(OCR.node_to_strings, socket_nodes)
-        if not self._run():
-            return None, None, None
-#move top right
-        self._locate_screen(0)
-        self._move_screen_to_node(44988)
-        socket_nodes = self._analyze_nodes(6230)
-        jobs[6230] = pool.map_async(OCR.node_to_strings, socket_nodes)
-        socket_nodes = self._analyze_nodes(48768)
-        jobs[48768] = pool.map_async(OCR.node_to_strings, socket_nodes)
-        socket_nodes = self._analyze_nodes(31683)
-        jobs[31683] = pool.map_async(OCR.node_to_strings, socket_nodes)
-        socket_nodes = self._analyze_nodes(33989)
-        jobs[33989] = pool.map_async(OCR.node_to_strings, socket_nodes)
-        socket_nodes = self._analyze_nodes(61834)
-        jobs[61834] = pool.map_async(OCR.node_to_strings, socket_nodes)
-        socket_nodes = self._analyze_nodes(32763)
-        jobs[32763] = pool.map_async(OCR.node_to_strings, socket_nodes)
-        if not self._run():
-            return None, None, None
-#move to random node
-        self._move_screen_to_node(39821)
-        socket_nodes = self._analyze_nodes(60735)
-        jobs[60735] = pool.map_async(OCR.node_to_strings, socket_nodes)
-
-
+#analyse nodes
+        for socket_id in SOCKET_IDS:
+            self._move_screen_to_node(socket_id)
+            socket_nodes = self._analyze_nodes(socket_id)
 #            # Convert stats for the socket from image to lines in separate process
 #            self.log.info("Performing asynchronous OCR")
-#            jobs[socket_id] = pool.map_async(OCR.node_to_strings, socket_nodes)
+            jobs[socket_id] = pool.map_async(OCR.node_to_strings, socket_nodes)
 #            self.log.info("Analyzed socket %s" % socket_id)
+            if not self._run():
+                return None, None, None
 
         self._setup(item_location)
         self.log.info("Waiting for last OCR to finish")
@@ -202,6 +143,7 @@ class TreeNavigator:
         cam_absolute_coords=(int(self.resolution[0]/2)+cam_relative_coords[0],int(self.resolution[1]/2)+cam_relative_coords[1])
         #don't return garbage coords. Maybe this is wrong?
         if cam_absolute_coords[0]<0 or cam_absolute_coords[0]>self.resolution[0] or cam_absolute_coords[1]<0 or cam_absolute_coords[1]>self.resolution[1]:
+            self.log.info("Tried to get offscreen coords!")
             return None
         return cam_absolute_coords
 
@@ -235,8 +177,11 @@ class TreeNavigator:
     def _move_to_tree_pos_using_spaces(self, tree_desired_pos, max_position_error=2):
 
         target = (int(tree_desired_pos[0]*t2s_scale),int(tree_desired_pos[1]*t2s_scale))
-        if target[0]>450:
-            target= (target[0]-500, target[1])
+#we only check the x bound, since all nodes are in bounds in the y direction
+        if target[0]<TREE_BOUND_X[0]+50:
+            target= (TREE_BOUND_X[0]+50, target[1])
+        if target[0]>TREE_BOUND_X[1]-50:
+            target= (TREE_BOUND_X[1]-50, target[1])
 
         dx = target[0] - self.camera_position[0]
         dy = target[1] - self.camera_position[1]
@@ -365,11 +310,11 @@ class TreeNavigator:
         return saved_coords
 
 
-    def _click_socket(self, tree_socket_pos, insert=True):
+    def _click_socket(self, tree_socket_pos, offset, insert=True):
         self.log.debug("Clicking socket")
         xy = self._tree_to_screen(tree_socket_pos)
-        lt = [xy[0] - 1, xy[1] - 1]
-        rb = [xy[0] + 1, xy[1] + 1]
+        lt = [xy[0]+offset[0] - 1, xy[1]+offset[1] - 1]
+        rb = [xy[0]+offset[0] + 1, xy[1]+offset[1] + 1]
         if insert:
             self.input_handler.click(*lt, *rb, button="left", raw=True)
         else:
@@ -377,25 +322,60 @@ class TreeNavigator:
         self.input_handler.rnd_sleep(min=200, mean=300)
 
 
-    def _analyze_nodes(self, socket_id):
+    def _analyze_nodes(self, socket_id, repeated=False):
         self.log.info("Analyzing nodes for socket id %s" % socket_id)
         node_ids = neighbor_nodes[socket_id]
         tree_socket_pos=node_coords[socket_id]
 
-        nodes =[]
-        self._click_socket(tree_socket_pos)
+#check the zone around where the socket is
+        thought_middle=self._tree_to_screen(tree_socket_pos)
+        lt=[thought_middle[0]-30,thought_middle[1]-30]
+        rb=[thought_middle[0]+30,thought_middle[1]+30]
+        searched_area = grab_screen(tuple(lt + rb))
+        searched_area = cv2.cvtColor(searched_area, cv2.COLOR_BGR2GRAY)
+#match it to the saved image of that socket
+        locations = np.zeros_like(searched_area)
 
+        centered_coordinates=self._match_image(searched_area,str(socket_id)+".png")
+        locations[tuple(centered_coordinates)] = 1
+
+        rel_space_pos_yx = np.argwhere(locations == 1)
+        rel_space_pos = rel_space_pos_yx.T[::-1].T
+        if len(rel_space_pos) == 0:
+            if repeated==True:
+                self.log.warning("Could not find the socket! Giving up.")
+                return []
+            self.log.warning("Could not find the socket! Trying again.")
+            self._locate_screen(3)
+            self._move_screen_to_node(socket_id)
+            return self._analyze_nodes(socket_id,repeated=True)
+        first_rel_space_pos=rel_space_pos[0]
+        offset= (first_rel_space_pos[0]-30, first_rel_space_pos[1]-30)
+        self.log.info("offset: ({}, {})".format( offset[0], offset[1] ) )
+
+        nodes =[]
+        self._click_socket(tree_socket_pos,offset)
+
+#        new_path=str(socket_id)+'/'
+#        if not os.path.exists(os.path.join(IMAGE_FOLDER, new_path)):
+#            os.makedirs(os.path.join(IMAGE_FOLDER, new_path))
         for node_id in node_ids:
             if not self._run():
                 return
-            node_stats = self._get_node_data(node_id)
+            node_stats = self._get_node_data(node_id,offset)
+#REMOVE LATER
+#            file_name=str(socket_id)+'/'+str(node_id)+'.png'
+#            save_path = os.path.join(IMAGE_FOLDER, file_name)
+#            img= Image.fromarray(node_stats)
+#            img.save(save_path)
+#REMOVE
             #self.log.info("node: %s" % node_id)
             node = {
                 "id": node_id,
                 "stats": node_stats,
             }
             nodes.append(node)
-        self._click_socket(tree_socket_pos, insert=False)
+        self._click_socket(tree_socket_pos,offset, insert=False)
         return nodes
 
 
@@ -403,9 +383,6 @@ class TreeNavigator:
         template = self.templates_and_masks[template_name]["image"]
         mask = self.templates_and_masks[template_name]["mask"]
         res = cv2.matchTemplate(screen, template, cv2.TM_CCORR_NORMED, mask=mask)
-        if template_name!="FreeSpace.png":
-                cv2.imwrite("screen.png",screen)
-                cv2.imwrite("template.png",template)
         coordinates = np.where(
             res >= TEMPLATES[template_name][self.resolution_prefix + "threshold"]
         )
@@ -423,10 +400,10 @@ class TreeNavigator:
         return centered_coordinates
 
 
-    def _get_node_data(self, node_id):
+    def _get_node_data(self, node_id,offset):
         self.log.debug("Getting node stats for node %s" % node_id)
         location = self._tree_to_screen(node_coords[node_id])
-        location=(int(location[0]),int(location[1]))
+        location=(int(location[0])+offset[0],int(location[1])+offset[1])
         lt = [
             location[0] - 1,
             location[1] - 1,
@@ -497,7 +474,7 @@ class TreeNavigator:
 
             if mods:
                 filtered_nodes.append(
-                    {"location": node["location"], "name": names, "mods": mods}
+                    {"id": node["id"], "name": names, "mods": mods}
                 )
 
         return filtered_nodes
@@ -565,7 +542,7 @@ class OCR:
 
     @staticmethod
     def getFilteredImage(src):
-        srcH, srcW = src.shape[:2]
+        srcH, srcW = src.shape[:2] 
         src = cv2.resize(src, (int(srcW * 2), int(srcH * 2)))
 
         # HSV thresholding to get rid of as much background as possible
@@ -599,4 +576,4 @@ class OCR:
         img = node["stats"]
         filt_img = OCR.getFilteredImage(img)
         text = OCR.imageToStringArray(filt_img)
-        return {"location": node["location"], "stats": text}
+        return {"id": node["id"], "stats": text}
